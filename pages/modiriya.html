@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المديرية الوطنية للخدمات الجامعية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-6">
+
+        <!-- Title -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">المديرية الوطنية للخدمات الجامعية</h1>
+            <p class="text-gray-600 text-xl">تسجيل الدخول لإدارة الإقامات الجامعية</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg transform transition-all hover:scale-105 duration-300">
+            <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
+            <form id="loginForm" class="space-y-6">
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل البريد الإلكتروني">
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                    <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل كلمة المرور">
+                </div>
+
+                <!-- Login Button -->
+                <div class="text-center">
+                    <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition duration-300 w-full">تسجيل الدخول</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modiriya Iqamat Data (Shown after login) -->
+        <div id="modiriyaContent" class="mt-8 hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">الإقامات الجامعية الخاصة بالمديرية</h2>
+                <p class="text-gray-600 mt-2">إجمالي الإقامات: <span id="iqamatCount">3</span></p>
+            </div>
+
+            <!-- Iqamat Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                    <thead class="bg-orange-500 text-white">
+                        <tr>
+                            <th class="px-6 py-3 text-left">إقامة</th>
+                            <th class="px-6 py-3 text-left">عدد الغرف</th>
+                            <th class="px-6 py-3 text-left">عدد الأسرة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-6 py-4 border-b">إقامة 1</td>
+                            <td class="px-6 py-4 border-b">10</td>
+                            <td class="px-6 py-4 border-b">20</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 border-b">إقامة 2</td>
+                            <td class="px-6 py-4 border-b">15</td>
+                            <td class="px-6 py-4 border-b">30</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 border-b">إقامة 3</td>
+                            <td class="px-6 py-4 border-b">8</td>
+                            <td class="px-6 py-4 border-b">16</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Display iqamat data once the login form is submitted
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent page refresh on form submission
+
+            // Hide login form
+            document.getElementById("loginForm").classList.add("hidden");
+
+            // Display iqamat content after "login"
+            document.getElementById("modiriyaContent").classList.remove("hidden");
+
+            // Example of dynamically updating iqamat count (you can update with real data in the future)
+            const iqamatCount = document.querySelectorAll("#iqamatList .bg-white").length;
+            document.getElementById("iqamatCount").innerText = iqamatCount;
+        });
+    </script>
+
+</body>
+</html>

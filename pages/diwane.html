@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الإقامات</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom animation for fading and sliding */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.8s ease-out;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+  <div class="container mx-auto p-6 fade-in-up">
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-orange-600">إدارة الإقامات</h1>
+      <p class="text-gray-600">إضافة، تعديل، وحذف حسابات الإقامات</p>
+    </div>
+
+    <!-- Add City Form -->
+    <div class="bg-white shadow-md rounded p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">إضافة إقامة جديدة</h2>
+      <form id="add-city-form" class="space-y-4">
+        <div>
+          <label for="city-name" class="block text-gray-700">اسم الإقامة:</label>
+          <input type="text" id="city-name" name="city-name" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل اسم الإقامة" required>
+        </div>
+        <div>
+          <label for="city-wilaya" class="block text-gray-700">الولاية:</label>
+          <input type="text" id="city-wilaya" name="city-wilaya" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل الولاية" required>
+        </div>
+        <div>
+          <label for="city-contact" class="block text-gray-700">جهة الاتصال:</label>
+          <input type="text" id="city-contact" name="city-contact" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل جهة الاتصال">
+        </div>
+        <div>
+          <label for="city-address" class="block text-gray-700">العنوان:</label>
+          <input type="text" id="city-address" name="city-address" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل العنوان">
+        </div>
+        <div>
+          <label for="city-email" class="block text-gray-700">البريد الإلكتروني:</label>
+          <input type="email" id="city-email" name="city-email" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل البريد الإلكتروني" required>
+        </div>
+        <div>
+          <label for="city-password" class="block text-gray-700">كلمة المرور:</label>
+          <input type="password" id="city-password" name="city-password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل كلمة المرور" required>
+        </div>
+        <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition duration-300 transform hover:scale-105">
+          إضافة
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-white shadow-md rounded p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">قائمة الإقامات</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-300">
+            <thead>
+              <tr class="bg-orange-100 text-gray-700">
+                <th class="py-2 px-4 border-b">اسم الإقامة</th>
+                <th class="py-2 px-4 border-b">الولاية</th>
+                <th class="py-2 px-4 border-b">جهة الاتصال</th>
+                <th class="py-2 px-4 border-b">العنوان</th>
+                <th class="py-2 px-4 border-b">البريد الإلكتروني</th>
+                <th class="py-2 px-4 border-b">كلمة المرور</th>
+                <th class="py-2 px-4 border-b">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="city-list">
+         
+              <tr class="hover:bg-gray-100 transition duration-300">
+                <td class="py-2 px-4 border-b">إقامة الجامعة</td>
+                <td class="py-2 px-4 border-b">البليدة</td>
+                <td class="py-2 px-4 border-b">010-123-4567</td>
+                <td class="py-2 px-4 border-b">شارع الجامعة</td>
+                <td class="py-2 px-4 border-b">example@email.com</td>
+                <td class="py-2 px-4 border-b">********</td>
+                <td class="py-2 px-4 border-b">
+                  <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition duration-300 transform hover:scale-105">تعديل</button>
+                  <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105">حذف</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+  </div>
+</body>
+
+</html>
