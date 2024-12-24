@@ -7,34 +7,43 @@
   <title>إدارة الإقامات</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Custom animation for fading and sliding */
-    @keyframes fadeInUp {
-      0% {
+    @keyframes fadeIn {
+      from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(-10px);
       }
-      100% {
+      to {
         opacity: 1;
         transform: translateY(0);
       }
     }
 
-    .fade-in-up {
-      animation: fadeInUp 0.8s ease-out;
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
     }
   </style>
 </head>
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
-  <div class="container mx-auto p-6 fade-in-up space-y-8">
+  <div class="container mx-auto p-6 space-y-8">
     <!-- Header -->
     <div class="text-center mb-6">
       <h1 class="text-4xl font-bold text-orange-600">إدارة الإقامات</h1>
       <p class="text-gray-600">إضافة، تعديل، وحذف حسابات الإقامات</p>
     </div>
 
-    <!-- Add Modiriya Section -->
-    <div class="bg-white shadow-md rounded p-6">
+    <!-- Buttons to Add Modiriya or Iqama -->
+    <div class="flex justify-center space-x-4">
+      <button onclick="toggleForm('modiriya-form-container')" class="bg-orange-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-600 transition duration-300">
+        إضافة مديرية
+      </button>
+      <button onclick="toggleForm('iqama-form-container')" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+        إضافة إقامة
+      </button>
+    </div>
+
+    <!-- Add Modiriya Form -->
+    <div id="modiriya-form-container" class="hidden fade-in bg-white shadow-md rounded p-6">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة مديرية جديدة</h2>
       <form id="add-modiriya-form" class="space-y-4">
         <div>
@@ -47,71 +56,85 @@
       </form>
     </div>
 
+    <!-- Add Iqama Form -->
+    <div id="iqama-form-container" class="hidden fade-in bg-white shadow-md rounded p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة إقامة جديدة</h2>
+      <form id="add-iqama-form" class="space-y-4">
+        <div>
+          <label for="modiriya-select" class="block text-gray-700">اختر المديرية:</label>
+          <select id="modiriya-select" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            <option value="">اختر المديرية</option>
+            <option value="مديرية البليدة">مديرية البليدة</option>
+            <option value="مديرية الجزائر">مديرية الجزائر</option>
+          </select>
+        </div>
+        <div>
+          <label for="iqama-name" class="block text-gray-700">اسم الإقامة:</label>
+          <input type="text" id="iqama-name" name="iqama-name" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل اسم الإقامة" required>
+        </div>
+        <div>
+          <label for="iqama-contact" class="block text-gray-700">جهة الاتصال:</label>
+          <input type="text" id="iqama-contact" name="iqama-contact" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل رقم جهة الاتصال" required>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300 transform hover:scale-105">
+          إضافة
+        </button>
+      </form>
+    </div>
+
     <!-- List of Modiriyas Section -->
     <div class="bg-white shadow-md rounded p-6">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">قائمة المديريات</h2>
-      <div class="space-y-4">
-        <!-- Example Modiriya Card -->
-        <div class="bg-gray-50 p-4 rounded-md shadow hover:bg-gray-100 transition">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-800">مديرية البليدة</h3>
-            <div>
-              <button onclick="toggleIqamat('iqamat-blida')" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300 transform hover:scale-105">
-                عرض الإقامات
-              </button>
-              <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105">
-                حذف
-              </button>
-            </div>
-          </div>
-          <p class="text-sm text-gray-600 mt-2">تشمل عدة إقامات في البليدة.</p>
-          <!-- Iqamat List -->
-          <div id="iqamat-blida" class="space-y-3 mt-4 hidden">
-            <div class="bg-white p-3 rounded shadow">
-              <h4 class="text-gray-800 font-semibold">إقامة الجامعة</h4>
-              <p class="text-sm text-gray-600">العنوان: شارع الجامعة، البليدة</p>
-              <p class="text-sm text-gray-600">جهة الاتصال: 010-123-4567</p>
-            </div>
-            <div class="bg-white p-3 rounded shadow">
-              <h4 class="text-gray-800 font-semibold">إقامة المستقبل</h4>
-              <p class="text-sm text-gray-600">العنوان: حي المستقبل، البليدة</p>
-              <p class="text-sm text-gray-600">جهة الاتصال: 020-456-7890</p>
-            </div>
-          </div>
-        </div>
 
-        <div class="bg-gray-50 p-4 rounded-md shadow hover:bg-gray-100 transition">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-800">مديرية الجزائر</h3>
-            <div>
-              <button onclick="toggleIqamat('iqamat-algiers')" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300 transform hover:scale-105">
-                عرض الإقامات
-              </button>
-              <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105">
-                حذف
-              </button>
-            </div>
-          </div>
-          <p class="text-sm text-gray-600 mt-2">تشمل عدة إقامات في الجزائر العاصمة.</p>
-          <!-- Iqamat List -->
-          <div id="iqamat-algiers" class="space-y-3 mt-4 hidden">
-            <div class="bg-white p-3 rounded shadow">
-              <h4 class="text-gray-800 font-semibold">إقامة الأمل</h4>
-              <p class="text-sm text-gray-600">العنوان: حي الأمل، الجزائر</p>
-              <p class="text-sm text-gray-600">جهة الاتصال: 030-789-1234</p>
-            </div>
-            <div class="bg-white p-3 rounded shadow">
-              <h4 class="text-gray-800 font-semibold">إقامة الفجر</h4>
-              <p class="text-sm text-gray-600">العنوان: شارع الفجر، الجزائر</p>
-              <p class="text-sm text-gray-600">جهة الاتصال: 040-321-6547</p>
-            </div>
-          </div>
-        </div>
+      <!-- Responsive Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500">
+          <thead class="bg-gray-50 text-gray-700 uppercase">
+            <tr>
+              <th scope="col" class="px-4 py-2">اسم المديرية</th>
+              <th scope="col" class="px-4 py-2">الإقامات</th>
+              <th scope="col" class="px-4 py-2">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Example Row for Modiriya -->
+            <tr class="bg-white border-b hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-800">مديرية البليدة</td>
+              <td class="px-4 py-3">
+                <button onclick="toggleIqamat('iqamat-blida')" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300 transform hover:scale-105">
+                  عرض الإقامات
+                </button>
+                <div id="iqamat-blida" class="hidden mt-2 space-y-2">
+                  <p class="text-gray-600">إقامة الجامعة: شارع الجامعة، البليدة (جهة الاتصال: 010-123-4567)</p>
+                  <p class="text-gray-600">إقامة المستقبل: حي المستقبل، البليدة (جهة الاتصال: 020-456-7890)</p>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105">
+                  حذف
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
   <script>
+    function toggleForm(formId) {
+      // Hide other forms and toggle the selected one
+      const forms = ['modiriya-form-container', 'iqama-form-container'];
+      forms.forEach(id => {
+        const form = document.getElementById(id);
+        if (id === formId) {
+          form.classList.toggle('hidden');
+        } else {
+          form.classList.add('hidden');
+        }
+      });
+    }
+
     function toggleIqamat(id) {
       const iqamatDiv = document.getElementById(id);
       iqamatDiv.classList.toggle('hidden');
