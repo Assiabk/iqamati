@@ -6,26 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="pages/styles/index.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>إدارة الموقع</title>
+
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.firebasestorage.app",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+    </script>
+
+    <title>إدارة اقامتي</title>
 </head>
 
 <body class="bg-gray-100">
     <header class="text-gray-800 py-8 shadow-lg bg-white relative h-52">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <div class="absolute inset-0 flex justify-center items-center opacity-10">
-                <img src="pages/images/iqama_logo.jpg"  class="w-full h-full object-cover">
+                <img src="pages/images/iqama_logo.jpg" class="w-full h-full object-cover">
             </div>
         </div>
     </header>
-    
-    
 
     <div class="max-w-7xl mx-auto px-4 mt-12">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Card 1 -->
             <a href="pages/diwane.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="https://yt3.googleusercontent.com/NmUPNag_E9nezPVHcHd8eeIg8qB79Ft1O8BiI6IzJ7Kc-6TS_W-BDv25L0JOdqe7xrqCPnHr=s900-c-k-c0x00ffffff-no-rj"
+                    <img src="pages/images/diwand.jpg"
                         class="w-full h-48 object-cover">
                     <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
                 </div>
@@ -38,7 +61,7 @@
 
             <a href="pages/modiriya.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="https://yt3.googleusercontent.com/NmUPNag_E9nezPVHcHd8eeIg8qB79Ft1O8BiI6IzJ7Kc-6TS_W-BDv25L0JOdqe7xrqCPnHr=s900-c-k-c0x00ffffff-no-rj"
+                    <img src="pages/images/diwand.jpg"
                         class="w-full h-48 object-cover">
                     <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
                 </div>
@@ -51,7 +74,7 @@
 
             <a href="pages/iqama.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="https://yt3.googleusercontent.com/NmUPNag_E9nezPVHcHd8eeIg8qB79Ft1O8BiI6IzJ7Kc-6TS_W-BDv25L0JOdqe7xrqCPnHr=s900-c-k-c0x00ffffff-no-rj"
+                    <img src="pages/images/diwand.jpg"
                         class="w-full h-48 object-cover">
                     <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
                 </div>
@@ -64,12 +87,12 @@
 
         </div>
     </div>
+
     <footer class="bg-gray-800 text-white py-8 mt-16">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <p>&copy; 2024 إدارة الموقع. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
-
 </body>
 
 </html>

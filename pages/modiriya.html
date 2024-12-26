@@ -23,13 +23,13 @@
                 <!-- Email -->
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
-                    <input type="email" id="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل البريد الإلكتروني">
+                    <input type="email" id="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل البريد الإلكتروني" required>
                 </div>
 
                 <!-- Password -->
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
-                    <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل كلمة المرور">
+                    <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل كلمة المرور" required>
                 </div>
 
                 <!-- Login Button -->
@@ -79,20 +79,62 @@
 
     </div>
 
-    <script>
-        // Display iqamat data once the login form is submitted
-        document.getElementById("loginForm").addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevent page refresh on form submission
+    <script type="module">
+        // Import Firebase dependencies
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-            // Hide login form
-            document.getElementById("loginForm").classList.add("hidden");
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.appspot.com",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
 
-            // Display iqamat content after "login"
-            document.getElementById("modiriyaContent").classList.remove("hidden");
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-            // Example of dynamically updating iqamat count (you can update with real data in the future)
-            const iqamatCount = document.querySelectorAll("#iqamatList .bg-white").length;
-            document.getElementById("iqamatCount").innerText = iqamatCount;
+        // Save admin credentials to Firestore (Run this manually once, then comment it out)
+        async function saveAdminCredentials() {
+            try {
+                await setDoc(doc(db, "admins", "modiriyaAdmin"), {
+                    email: "adminmodiriya@gmail.com",
+                    password: "modiriya"
+                });
+                console.log("Admin credentials saved.");
+            } catch (error) {
+                console.error("Error saving admin credentials:", error);
+            }
+        }
+
+      
+        saveAdminCredentials();
+
+  
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent page refresh
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                // Authenticate user
+                await signInWithEmailAndPassword(auth, email, password);
+
+                // Hide login form and show modiriya content
+                document.getElementById("loginForm").classList.add("hidden");
+                document.getElementById("modiriyaContent").classList.remove("hidden");
+                console.log("Login successful!");
+            } catch (error) {
+                console.error("Error logging in:", error.message);
+                alert("فشل تسجيل الدخول. تحقق من البريد الإلكتروني أو كلمة المرور.");
+            }
         });
     </script>
 
