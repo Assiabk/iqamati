@@ -4,229 +4,212 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles/diwane.css">
   <title>إدارة الديوان الوطني للخدمات الجامعية</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
   <div class="container mx-auto p-6 space-y-8">
-
+    <!-- Header -->
     <div class="text-center mb-6">
       <h1 class="text-4xl font-bold text-orange-600">إدارة الديوان الوطني للخدمات الجامعية</h1>
       <p class="text-gray-600">إضافة، تعديل، وحذف حسابات الإقامات المديريات</p>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:justify-center sm:space-x-6 space-y-4 sm:space-y-0">
-      <button id="add-modiriya-btn" class="bg-orange-500 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-orange-600 transition duration-300 w-full sm:w-1/4 text-lg">
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row sm:justify-center sm:space-x-4 space-y-4 sm:space-y-0">
+      <button id="add-modiriya-btn" class="bg-orange-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-600 transition duration-300 w-full sm:w-auto">
         إضافة مديرية
       </button>
-
-      <button id="add-iqama-btn" class="bg-blue-500 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-blue-600 transition duration-300 w-full sm:w-1/4 text-lg">
+      <button id="add-iqama-btn" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 w-full sm:w-auto">
         إضافة إقامة
       </button>
-
-      <button id="view-modiriyas-btn" class="bg-green-500 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 w-full sm:w-1/4 text-lg">
-        عرض المديريات
-      </button>
-
-      <button id="view-iqama-btn" class="bg-purple-500 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 w-full sm:w-1/4 text-lg">
-        عرض الإقامات
-      </button>
     </div>
 
-    <div id="search-modiriya-container" class="mt-6 hidden text-center">
-      <input type="text" id="search-modiriya-input" class="border px-4 py-2 rounded-lg" placeholder="بحث عن المديرية...">
+    <!-- Forms -->
+    <!-- Modiriya Form -->
+    <div id="modiriya-form-container" class="hidden fade-in bg-white shadow-md rounded p-6 mt-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة مديرية جديدة</h2>
+      <form id="add-modiriya-form" class="space-y-4">
+        <div>
+          <label for="modiriya-region" class="block text-gray-700">اسم المنطقة:</label>
+          <input type="text" id="modiriya-region" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل اسم المنطقة" required>
+        </div>
+        <div>
+          <label for="modiriya-name" class="block text-gray-700">اسم المديرية:</label>
+          <input type="text" id="modiriya-name" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل اسم المديرية" required>
+        </div>
+        <div>
+          <label for="modiriya-email" class="block text-gray-700">البريد الإلكتروني:</label>
+          <input type="email" id="modiriya-email" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل البريد الإلكتروني" required>
+        </div>
+        <div>
+          <label for="modiriya-phone" class="block text-gray-700">رقم الهاتف:</label>
+          <input type="text" id="modiriya-phone" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل رقم الهاتف" required>
+        </div>
+        <div>
+          <label for="modiriya-password" class="block text-gray-700">كلمة المرور:</label>
+          <input type="password" id="modiriya-password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل كلمة المرور" required>
+        </div>
+        <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition duration-300 w-full sm:w-auto">
+          إضافة
+        </button>
+      </form>
     </div>
 
-    <div id="search-iqama-container" class="mt-6 hidden text-center">
-      <input type="text" id="search-iqama-input" class="border px-4 py-2 rounded-lg" placeholder="بحث عن الإقامة...">
+    <!-- IQama Form -->
+    <div id="iqama-form-container" class="hidden fade-in bg-white shadow-md rounded p-6 mt-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة إقامة جديدة</h2>
+      <form id="add-iqama-form" class="space-y-4">
+        <div>
+          <label for="iqama-region" class="block text-gray-700">اسم المنطقة:</label>
+          <input type="text" id="iqama-region" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل اسم المنطقة" required>
+        </div>
+        <div>
+          <label for="iqama-name" class="block text-gray-700">اسم الإقامة:</label>
+          <input type="text" id="iqama-name" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل اسم الإقامة" required>
+        </div>
+        <div>
+          <label for="modiriya-select" class="block text-gray-700">اختار المديرية:</label>
+          <select id="modiriya-select" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            <option value="" disabled selected>اختار المديرية</option>
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div>
+          <label for="iqama-email" class="block text-gray-700">البريد الإلكتروني:</label>
+          <input type="email" id="iqama-email" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل البريد الإلكتروني" required>
+        </div>
+        <div>
+          <label for="iqama-phone" class="block text-gray-700">رقم الهاتف:</label>
+          <input type="text" id="iqama-phone" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل رقم الهاتف" required>
+        </div>
+        <div>
+          <label for="iqama-password" class="block text-gray-700">كلمة المرور:</label>
+          <input type="password" id="iqama-password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل كلمة المرور" required>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300 w-full sm:w-auto">
+          إضافة
+        </button>
+      </form>
     </div>
 
-    <div id="modiriyas-list-container" class="hidden mt-6 overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-        <thead>
-          <tr>
-            <th class="px-4 py-2 border-b text-center">اسم المديرية</th>
-            <th class="px-4 py-2 border-b text-center">المنطقة</th>
-            <th class="px-4 py-2 border-b text-center">البريد الإلكتروني</th>
-            <th class="px-4 py-2 border-b text-center">رقم الهاتف</th>
-            <th class="px-4 py-2 border-b text-center">العملية</th>
-          </tr>
-        </thead>
-        <tbody id="modiriyas-list"></tbody>
-      </table>
+    <!-- Alerts -->
+    <div id="success-alert" class="hidden fixed top-0 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-md mt-4 fade-in">
+      <span>تمت الإضافة بنجاح!</span>
     </div>
 
-    <div id="iqamas-list-container" class="hidden mt-6 overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-        <thead>
-          <tr>
-            <th class="px-4 py-2 border-b text-center">اسم الإقامة</th>
-            <th class="px-4 py-2 border-b text-center">المنطقة</th>
-            <th class="px-4 py-2 border-b text-center">البريد الإلكتروني</th>
-            <th class="px-4 py-2 border-b text-center">رقم الهاتف</th>
-            <th class="px-4 py-2 border-b text-center">المديرية</th>
-            <th class="px-4 py-2 border-b text-center">العملية</th>
-          </tr>
-        </thead>
-        <tbody id="iqamas-list"></tbody>
-      </table>
+    <div id="error-alert" class="hidden fixed top-0 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-4 rounded-lg shadow-md mt-4 fade-in">
+      <span>خطأ: <span id="error-message">حدث خطأ يرجى المحاولة لاحقًا</span></span>
     </div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
-      import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+    <!-- Display Modiriyas and IQamas -->
+    <div id="modiriyas-list-container" class="mt-8">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">قائمة المديريات</h2>
+      <div id="modiriyas-list" class="space-y-4"></div>
+    </div>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
-        authDomain: "iqamatisite.firebaseapp.com",
-        projectId: "iqamatisite",
-        storageBucket: "iqamatisite.firebasestorage.app",
-        messagingSenderId: "240286199373",
-        appId: "1:240286199373:web:c1c9b01529edf378f33604"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-
-      const viewModiriyasBtn = document.getElementById('view-modiriyas-btn');
-      const viewIqamaBtn = document.getElementById('view-iqama-btn');
-      const modiriyasList = document.getElementById('modiriyas-list');
-      const iqamasList = document.getElementById('iqamas-list');
-      const searchModiriyaInput = document.getElementById('search-modiriya-input');
-      const searchIqamaInput = document.getElementById('search-iqama-input');
-      const modiriyasListContainer = document.getElementById('modiriyas-list-container');
-      const iqamasListContainer = document.getElementById('iqamas-list-container');
-      const searchModiriyaContainer = document.getElementById('search-modiriya-container');
-      const searchIqamaContainer = document.getElementById('search-iqama-container');
-
-      // Function to delete a modiriya
-      async function deleteModiriya(id) {
-        try {
-          await deleteDoc(doc(db, "modiriyas", id));
-          alert('تم الحذف بنجاح');
-          viewModiriyas();  // Refresh the list after deletion
-        } catch (error) {
-          console.error('Error deleting modiriya: ', error);
-        }
-      }
-
-      // Function to delete an iqama
-      async function deleteIqama(id) {
-        try {
-          await deleteDoc(doc(db, "iqamas", id));
-          alert('تم الحذف بنجاح');
-          viewIqamas();  // Refresh the list after deletion
-        } catch (error) {
-          console.error('Error deleting iqama: ', error);
-        }
-      }
-
-      // Search function for modiriyas
-      searchModiriyaInput.addEventListener('input', () => {
-        const query = searchModiriyaInput.value.toLowerCase();
-        filterModiriyas(query);
-      });
-
-      // Search function for iqamas
-      searchIqamaInput.addEventListener('input', () => {
-        const query = searchIqamaInput.value.toLowerCase();
-        filterIqamas(query);
-      });
-
-      // Filter Modiriyas based on search input
-      function filterModiriyas(query) {
-        const rows = [...modiriyasList.rows];
-        rows.forEach(row => {
-          const nameCell = row.cells[0].textContent.toLowerCase();
-          row.style.display = nameCell.includes(query) ? '' : 'none';
-        });
-      }
-
-      // Filter Iqamas based on search input
-      function filterIqamas(query) {
-        const rows = [...iqamasList.rows];
-        rows.forEach(row => {
-          const nameCell = row.cells[0].textContent.toLowerCase();
-          row.style.display = nameCell.includes(query) ? '' : 'none';
-        });
-      }
-
-      // Display Modiriyas in a table
-      viewModiriyasBtn.addEventListener('click', async () => {
-        modiriyasListContainer.classList.remove('hidden');
-        iqamasListContainer.classList.add('hidden');
-        searchModiriyaContainer.classList.remove('hidden');
-        searchIqamaContainer.classList.add('hidden');
-
-        // Clear previous list
-        modiriyasList.innerHTML = '';
-
-        try {
-          const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
-          modiriyasSnapshot.forEach(doc => {
-            const modiriya = doc.data();
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td class="px-4 py-2 border-b text-center">${modiriya.name}</td>
-              <td class="px-4 py-2 border-b text-center">${modiriya.region}</td>
-              <td class="px-4 py-2 border-b text-center">${modiriya.email}</td>
-              <td class="px-4 py-2 border-b text-center">${modiriya.phone}</td>
-              <td class="px-4 py-2 border-b text-center">
-                <button class="bg-red-500 text-white py-1 px-3 rounded" id="delete-${doc.id}">حذف</button>
-              </td>
-            `;
-            modiriyasList.appendChild(row);
-            const deleteButton = row.querySelector(`#delete-${doc.id}`);
-            deleteButton.addEventListener('click', () => deleteModiriya(doc.id));
-          });
-        } catch (error) {
-          console.error('Error fetching modiriyas: ', error);
-        }
-      });
-
-      // Display Iqamas in a table
-      viewIqamaBtn.addEventListener('click', async () => {
-        iqamasListContainer.classList.remove('hidden');
-        modiriyasListContainer.classList.add('hidden');
-        searchIqamaContainer.classList.remove('hidden');
-        searchModiriyaContainer.classList.add('hidden');
-
-        // Clear previous list
-        iqamasList.innerHTML = '';
-
-        try {
-          const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
-          iqamasSnapshot.forEach(doc => {
-            const iqama = doc.data();
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td class="px-4 py-2 border-b text-center">${iqama.name}</td>
-              <td class="px-4 py-2 border-b text-center">${iqama.region}</td>
-              <td class="px-4 py-2 border-b text-center">${iqama.email}</td>
-              <td class="px-4 py-2 border-b text-center">${iqama.phone}</td>
-              <td class="px-4 py-2 border-b text-center">${iqama.modiriya}</td>
-              <td class="px-4 py-2 border-b text-center">
-                <button class="bg-red-500 text-white py-1 px-3 rounded" id="delete-${doc.id}">حذف</button>
-              </td>
-            `;
-            iqamasList.appendChild(row);
-            const deleteButton = row.querySelector(`#delete-${doc.id}`);
-            deleteButton.addEventListener('click', () => deleteIqama(doc.id));
-          });
-        } catch (error) {
-          console.error('Error fetching iqamas: ', error);
-        }
-      });
-    </script>
-
+    <div id="iqamas-list-container" class="mt-8">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">قائمة الإقامات</h2>
+      <div id="iqamas-list" class="space-y-4"></div>
+    </div>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+      authDomain: "iqamatisite.firebaseapp.com",
+      projectId: "iqamatisite",
+      storageBucket: "iqamatisite.firebasestorage.app",
+      messagingSenderId: "240286199373",
+      appId: "1:240286199373:web:c1c9b01529edf378f33604"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Load modiriyas
+    const modiriyasList = document.getElementById("modiriyas-list");
+
+    async function loadModiriyas() {
+      const querySnapshot = await getDocs(collection(db, "modiriyas"));
+      querySnapshot.forEach(doc => {
+        const modiriyas = doc.data();
+        modiriyasList.innerHTML += `
+          <div class="bg-white p-4 rounded shadow-md">
+            <h3 class="text-xl font-semibold text-gray-800">${modiriyas.name}</h3>
+            <p>المنطقة: ${modiriyas.region}</p>
+            <p>البريد الإلكتروني: ${modiriyas.email}</p>
+            <p>الهاتف: ${modiriyas.phone}</p>
+            <button onclick="deleteModiriyas('${doc.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">حذف</button>
+          </div>
+        `;
+      });
+    }
+
+    // Load iqamas
+    const iqamasList = document.getElementById("iqamas-list");
+
+    async function loadIqamas() {
+      const querySnapshot = await getDocs(collection(db, "iqamas"));
+      querySnapshot.forEach(doc => {
+        const iqama = doc.data();
+        iqamasList.innerHTML += `
+          <div class="bg-white p-4 rounded shadow-md">
+            <h3 class="text-xl font-semibold text-gray-800">${iqama.name}</h3>
+            <p>المنطقة: ${iqama.region}</p>
+            <p>المديرية: ${iqama.modiriya}</p>
+            <p>البريد الإلكتروني: ${iqama.email}</p>
+            <p>الهاتف: ${iqama.phone}</p>
+            <button onclick="deleteIqama('${doc.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">حذف</button>
+          </div>
+        `;
+      });
+    }
+
+    // Delete modiriya
+    async function deleteModiriyas(id) {
+      await deleteDoc(doc(db, "modiriyas", id));
+      loadModiriyas();
+    }
+
+    // Delete iqama
+    async function deleteIqama(id) {
+      await deleteDoc(doc(db, "iqamas", id));
+      loadIqamas();
+    }
+
+    // Call the load functions when the page is loaded
+    loadModiriyas();
+    loadIqamas();
+
+  </script>
+
 </body>
 
 </html>
