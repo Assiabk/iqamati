@@ -138,78 +138,165 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
-
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
     const firebaseConfig = {
-      apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
-      authDomain: "iqamatisite.firebaseapp.com",
-      projectId: "iqamatisite",
-      storageBucket: "iqamatisite.firebasestorage.app",
-      messagingSenderId: "240286199373",
-      appId: "1:240286199373:web:c1c9b01529edf378f33604"
-    };
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.firebasestorage.app",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const auth = getAuth();
     const db = getFirestore(app);
 
-    // Load modiriyas
+    // DOM Elements
+    const addModiriyaBtn = document.getElementById("add-modiriya-btn");
+    const addIqamaBtn = document.getElementById("add-iqama-btn");
+    const modiriyaFormContainer = document.getElementById("modiriya-form-container");
+    const iqamaFormContainer = document.getElementById("iqama-form-container");
     const modiriyasList = document.getElementById("modiriyas-list");
-
-    async function loadModiriyas() {
-      const querySnapshot = await getDocs(collection(db, "modiriyas"));
-      querySnapshot.forEach(doc => {
-        const modiriyas = doc.data();
-        modiriyasList.innerHTML += `
-          <div class="bg-white p-4 rounded shadow-md">
-            <h3 class="text-xl font-semibold text-gray-800">${modiriyas.name}</h3>
-            <p>المنطقة: ${modiriyas.region}</p>
-            <p>البريد الإلكتروني: ${modiriyas.email}</p>
-            <p>الهاتف: ${modiriyas.phone}</p>
-            <button onclick="deleteModiriyas('${doc.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">حذف</button>
-          </div>
-        `;
-      });
-    }
-
-    // Load iqamas
     const iqamasList = document.getElementById("iqamas-list");
+    const successAlert = document.getElementById("success-alert");
+    const errorAlert = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
 
-    async function loadIqamas() {
-      const querySnapshot = await getDocs(collection(db, "iqamas"));
-      querySnapshot.forEach(doc => {
-        const iqama = doc.data();
-        iqamasList.innerHTML += `
-          <div class="bg-white p-4 rounded shadow-md">
-            <h3 class="text-xl font-semibold text-gray-800">${iqama.name}</h3>
-            <p>المنطقة: ${iqama.region}</p>
-            <p>المديرية: ${iqama.modiriya}</p>
-            <p>البريد الإلكتروني: ${iqama.email}</p>
-            <p>الهاتف: ${iqama.phone}</p>
-            <button onclick="deleteIqama('${doc.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">حذف</button>
-          </div>
+    // Add Modiriya Button
+    addModiriyaBtn.addEventListener("click", () => {
+      modiriyaFormContainer.classList.toggle("hidden");
+    });
+
+    // Add IQama Button
+    addIqamaBtn.addEventListener("click", () => {
+      iqamaFormContainer.classList.toggle("hidden");
+    });
+
+    // Fetch Modiriyas
+    async function fetchModiriyas() {
+      const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
+      modiriyasList.innerHTML = "";
+      modiriyasSnapshot.forEach((doc) => {
+        const modiriya = doc.data();
+        const modiriyaDiv = document.createElement("div");
+        modiriyaDiv.classList.add("bg-white", "p-4", "rounded", "shadow-md");
+        modiriyaDiv.innerHTML = `
+          <div class="text-xl font-semibold text-gray-800">${modiriya.name}</div>
+          <div class="text-gray-600">${modiriya.region}</div>
+          <button class="bg-red-500 text-white px-4 py-2 mt-4 rounded hover:bg-red-600 delete-btn" data-id="${doc.id}">حذف</button>
         `;
+        modiriyasList.appendChild(modiriyaDiv);
       });
     }
 
-    // Delete modiriya
-    async function deleteModiriyas(id) {
-      await deleteDoc(doc(db, "modiriyas", id));
-      loadModiriyas();
+    // Fetch IQamas
+    async function fetchIqamas() {
+      const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
+      iqamasList.innerHTML = "";
+      iqamasSnapshot.forEach((doc) => {
+        const iqama = doc.data();
+        const iqamaDiv = document.createElement("div");
+        iqamaDiv.classList.add("bg-white", "p-4", "rounded", "shadow-md");
+        iqamaDiv.innerHTML = `
+          <div class="text-xl font-semibold text-gray-800">${iqama.name}</div>
+          <div class="text-gray-600">${iqama.region}</div>
+          <button class="bg-red-500 text-white px-4 py-2 mt-4 rounded hover:bg-red-600 delete-btn" data-id="${doc.id}">حذف</button>
+        `;
+        iqamasList.appendChild(iqamaDiv);
+      });
     }
 
-    // Delete iqama
-    async function deleteIqama(id) {
-      await deleteDoc(doc(db, "iqamas", id));
-      loadIqamas();
-    }
+    // Add Modiriya
+    const modiriyaForm = document.getElementById("add-modiriya-form");
+    modiriyaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("modiriya-name").value;
+      const region = document.getElementById("modiriya-region").value;
+      const email = document.getElementById("modiriya-email").value;
+      const phone = document.getElementById("modiriya-phone").value;
+      const password = document.getElementById("modiriya-password").value;
 
-    // Call the load functions when the page is loaded
-    loadModiriyas();
-    loadIqamas();
+      try {
+        await addDoc(collection(db, "modiriyas"), {
+          name,
+          region,
+          email,
+          phone,
+          password
+        });
 
+        successAlert.classList.remove("hidden");
+        setTimeout(() => successAlert.classList.add("hidden"), 3000);
+        fetchModiriyas();
+      } catch (error) {
+        errorMessage.innerText = error.message;
+        errorAlert.classList.remove("hidden");
+        setTimeout(() => errorAlert.classList.add("hidden"), 3000);
+      }
+    });
+
+    // Add IQama
+    const iqamaForm = document.getElementById("add-iqama-form");
+    iqamaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("iqama-name").value;
+      const region = document.getElementById("iqama-region").value;
+      const email = document.getElementById("iqama-email").value;
+      const phone = document.getElementById("iqama-phone").value;
+      const password = document.getElementById("iqama-password").value;
+      const modiriyaId = document.getElementById("modiriya-select").value;
+
+      try {
+        await addDoc(collection(db, "iqamas"), {
+          name,
+          region,
+          email,
+          phone,
+          password,
+          modiriyaId
+        });
+
+        successAlert.classList.remove("hidden");
+        setTimeout(() => successAlert.classList.add("hidden"), 3000);
+        fetchIqamas();
+      } catch (error) {
+        errorMessage.innerText = error.message;
+        errorAlert.classList.remove("hidden");
+        setTimeout(() => errorAlert.classList.add("hidden"), 3000);
+      }
+    });
+
+    // Delete Modiriya
+    modiriyasList.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("delete-btn")) {
+        const modiriyaId = e.target.getAttribute("data-id");
+        try {
+          await deleteDoc(doc(db, "modiriyas", modiriyaId));
+          fetchModiriyas();
+        } catch (error) {
+          alert("حدث خطأ أثناء الحذف");
+        }
+      }
+    });
+
+    // Delete IQama
+    iqamasList.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("delete-btn")) {
+        const iqamaId = e.target.getAttribute("data-id");
+        try {
+          await deleteDoc(doc(db, "iqamas", iqamaId));
+          fetchIqamas();
+        } catch (error) {
+          alert("حدث خطأ أثناء الحذف");
+        }
+      }
+    });
+
+    // Initialize
+    fetchModiriyas();
+    fetchIqamas();
   </script>
-
 </body>
 
 </html>
