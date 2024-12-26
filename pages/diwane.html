@@ -47,7 +47,6 @@
     </div>
 
     <!-- Forms -->
-    <!-- Modiriya Form -->
     <div id="modiriya-form-container" class="hidden fade-in bg-white shadow-md rounded p-6 mt-6">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة مديرية جديدة</h2>
       <form id="add-modiriya-form" class="space-y-4">
@@ -77,7 +76,6 @@
       </form>
     </div>
 
-    <!-- IQama Form -->
     <div id="iqama-form-container" class="hidden fade-in bg-white shadow-md rounded p-6 mt-6">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">إضافة إقامة جديدة</h2>
       <form id="add-iqama-form" class="space-y-4">
@@ -114,6 +112,47 @@
       </form>
     </div>
 
+    <!-- Tables for Modiriyas and IQamas -->
+    <div id="modiriyas-table" class="bg-white shadow-md rounded p-6 mt-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">المديريات</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto text-right">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border-b">اسم المنطقة</th>
+              <th class="px-4 py-2 border-b">اسم المديرية</th>
+              <th class="px-4 py-2 border-b">البريد الإلكتروني</th>
+              <th class="px-4 py-2 border-b">رقم الهاتف</th>
+            </tr>
+          </thead>
+          <tbody id="modiriyas-table-body">
+            <!-- Data will be dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="iqamas-table" class="bg-white shadow-md rounded p-6 mt-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">الإقامات</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto text-right">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border-b">اسم المنطقة</th>
+              <th class="px-4 py-2 border-b">اسم الإقامة</th>
+              <th class="px-4 py-2 border-b">المديرية</th>
+              <th class="px-4 py-2 border-b">البريد الإلكتروني</th>
+              <th class="px-4 py-2 border-b">رقم الهاتف</th>
+            </tr>
+          </thead>
+          <tbody id="iqamas-table-body">
+            <!-- Data will be dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
     <!-- Alerts -->
     <div id="success-alert" class="hidden fixed top-0 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-md mt-4 fade-in">
       <span>تمت الإضافة بنجاح!</span>
@@ -123,180 +162,157 @@
       <span>خطأ: <span id="error-message">حدث خطأ يرجى المحاولة لاحقًا</span></span>
     </div>
 
-    <!-- Display Modiriyas and IQamas -->
-    <div id="modiriyas-list-container" class="mt-8">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">قائمة المديريات</h2>
-      <div id="modiriyas-list" class="space-y-4"></div>
-    </div>
-
-    <div id="iqamas-list-container" class="mt-8">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">قائمة الإقامات</h2>
-      <div id="iqamas-list" class="space-y-4"></div>
-    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+
     const firebaseConfig = {
-            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
-            authDomain: "iqamatisite.firebaseapp.com",
-            projectId: "iqamatisite",
-            storageBucket: "iqamatisite.firebasestorage.app",
-            messagingSenderId: "240286199373",
-            appId: "1:240286199373:web:c1c9b01529edf378f33604"
-        };
+      apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+      authDomain: "iqamatisite.firebaseapp.com",
+      projectId: "iqamatisite",
+      storageBucket: "iqamatisite.firebasestorage.app",
+      messagingSenderId: "240286199373",
+      appId: "1:240286199373:web:c1c9b01529edf378f33604"
+    };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    // DOM Elements
-    const addModiriyaBtn = document.getElementById("add-modiriya-btn");
-    const addIqamaBtn = document.getElementById("add-iqama-btn");
-    const modiriyaFormContainer = document.getElementById("modiriya-form-container");
-    const iqamaFormContainer = document.getElementById("iqama-form-container");
-    const modiriyasList = document.getElementById("modiriyas-list");
-    const iqamasList = document.getElementById("iqamas-list");
-    const successAlert = document.getElementById("success-alert");
-    const errorAlert = document.getElementById("error-alert");
-    const errorMessage = document.getElementById("error-message");
+    const modiriyaForm = document.getElementById('add-modiriya-form');
+    const iqamaForm = document.getElementById('add-iqama-form');
+    const successAlert = document.getElementById('success-alert');
+    const errorAlert = document.getElementById('error-alert');
+    const errorMessage = document.getElementById('error-message');
+    const modiriyasTableBody = document.getElementById('modiriyas-table-body');
+    const iqamasTableBody = document.getElementById('iqamas-table-body');
 
-    // Add Modiriya Button
-    addModiriyaBtn.addEventListener("click", () => {
-      modiriyaFormContainer.classList.toggle("hidden");
+    // Toggle Forms
+    document.getElementById('add-modiriya-btn').addEventListener('click', () => {
+      document.getElementById('modiriya-form-container').classList.remove('hidden');
+      document.getElementById('iqama-form-container').classList.add('hidden');
     });
 
-    // Add IQama Button
-    addIqamaBtn.addEventListener("click", () => {
-      iqamaFormContainer.classList.toggle("hidden");
+    document.getElementById('add-iqama-btn').addEventListener('click', () => {
+      document.getElementById('iqama-form-container').classList.remove('hidden');
+      document.getElementById('modiriya-form-container').classList.add('hidden');
     });
 
-    // Fetch Modiriyas
+    // Fetch modiriyas and populate table
     async function fetchModiriyas() {
-      const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
-      modiriyasList.innerHTML = "";
-      modiriyasSnapshot.forEach((doc) => {
-        const modiriya = doc.data();
-        const modiriyaDiv = document.createElement("div");
-        modiriyaDiv.classList.add("bg-white", "p-4", "rounded", "shadow-md");
-        modiriyaDiv.innerHTML = `
-          <div class="text-xl font-semibold text-gray-800">${modiriya.name}</div>
-          <div class="text-gray-600">${modiriya.region}</div>
-          <button class="bg-red-500 text-white px-4 py-2 mt-4 rounded hover:bg-red-600 delete-btn" data-id="${doc.id}">حذف</button>
-        `;
-        modiriyasList.appendChild(modiriyaDiv);
-      });
+      try {
+        const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
+        modiriyasSnapshot.forEach(doc => {
+          const modiriyadoc = doc.data();
+          modiriyasTableBody.innerHTML += `
+            <tr>
+              <td class="px-4 py-2 border-b">${modiriyadoc.region}</td>
+              <td class="px-4 py-2 border-b">${modiriyadoc.name}</td>
+              <td class="px-4 py-2 border-b">${modiriyadoc.email}</td>
+              <td class="px-4 py-2 border-b">${modiriyadoc.phone}</td>
+            </tr>
+          `;
+        });
+      } catch (error) {
+        console.error("Error fetching modiriyas: ", error);
+      }
     }
 
-    // Fetch IQamas
+    // Fetch iqamas and populate table
     async function fetchIqamas() {
-      const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
-      iqamasList.innerHTML = "";
-      iqamasSnapshot.forEach((doc) => {
-        const iqama = doc.data();
-        const iqamaDiv = document.createElement("div");
-        iqamaDiv.classList.add("bg-white", "p-4", "rounded", "shadow-md");
-        iqamaDiv.innerHTML = `
-          <div class="text-xl font-semibold text-gray-800">${iqama.name}</div>
-          <div class="text-gray-600">${iqama.region}</div>
-          <button class="bg-red-500 text-white px-4 py-2 mt-4 rounded hover:bg-red-600 delete-btn" data-id="${doc.id}">حذف</button>
-        `;
-        iqamasList.appendChild(iqamaDiv);
-      });
+      try {
+        const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
+        iqamasSnapshot.forEach(doc => {
+          const iqamaDoc = doc.data();
+          iqamasTableBody.innerHTML += `
+            <tr>
+              <td class="px-4 py-2 border-b">${iqamaDoc.region}</td>
+              <td class="px-4 py-2 border-b">${iqamaDoc.name}</td>
+              <td class="px-4 py-2 border-b">${iqamaDoc.modiriya}</td>
+              <td class="px-4 py-2 border-b">${iqamaDoc.email}</td>
+              <td class="px-4 py-2 border-b">${iqamaDoc.phone}</td>
+            </tr>
+          `;
+        });
+      } catch (error) {
+        console.error("Error fetching iqamas: ", error);
+      }
     }
 
-    // Add Modiriya
-    const modiriyaForm = document.getElementById("add-modiriya-form");
-    modiriyaForm.addEventListener("submit", async (e) => {
+    // Show success alert
+    function showSuccessAlert(message) {
+      successAlert.querySelector('span').innerText = message;
+      successAlert.classList.remove('hidden');
+      setTimeout(() => successAlert.classList.add('hidden'), 3000);
+    }
+
+    // Show error alert
+    function showErrorAlert(message) {
+      errorMessage.innerText = message;
+      errorAlert.classList.remove('hidden');
+      setTimeout(() => errorAlert.classList.add('hidden'), 3000);
+    }
+
+    // Handle Modiriya form submission
+    modiriyaForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById("modiriya-name").value;
-      const region = document.getElementById("modiriya-region").value;
-      const email = document.getElementById("modiriya-email").value;
-      const phone = document.getElementById("modiriya-phone").value;
-      const password = document.getElementById("modiriya-password").value;
+
+      const modiriyaRegion = document.getElementById('modiriya-region').value;
+      const modiriyaName = document.getElementById('modiriya-name').value;
+      const modiriyaEmail = document.getElementById('modiriya-email').value;
+      const modiriyaPhone = document.getElementById('modiriya-phone').value;
+      const modiriyaPassword = document.getElementById('modiriya-password').value;
 
       try {
+        // Add Modiriya to Firestore
         await addDoc(collection(db, "modiriyas"), {
-          name,
-          region,
-          email,
-          phone,
-          password
+          region: modiriyaRegion,
+          name: modiriyaName,
+          email: modiriyaEmail,
+          phone: modiriyaPhone,
         });
-
-        successAlert.classList.remove("hidden");
-        setTimeout(() => successAlert.classList.add("hidden"), 3000);
-        fetchModiriyas();
+        showSuccessAlert("تم إضافة المديرية بنجاح");
+        fetchModiriyas();  // Update the table
       } catch (error) {
-        errorMessage.innerText = error.message;
-        errorAlert.classList.remove("hidden");
-        setTimeout(() => errorAlert.classList.add("hidden"), 3000);
+        showErrorAlert("حدث خطأ في إضافة المديرية");
       }
     });
 
-    // Add IQama
-    const iqamaForm = document.getElementById("add-iqama-form");
-    iqamaForm.addEventListener("submit", async (e) => {
+    // Handle IQama form submission
+    iqamaForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById("iqama-name").value;
-      const region = document.getElementById("iqama-region").value;
-      const email = document.getElementById("iqama-email").value;
-      const phone = document.getElementById("iqama-phone").value;
-      const password = document.getElementById("iqama-password").value;
-      const modiriyaId = document.getElementById("modiriya-select").value;
+
+      const iqamaRegion = document.getElementById('iqama-region').value;
+      const iqamaName = document.getElementById('iqama-name').value;
+      const modiriyaSelect = document.getElementById('modiriya-select').value;
+      const iqamaEmail = document.getElementById('iqama-email').value;
+      const iqamaPhone = document.getElementById('iqama-phone').value;
+      const iqamaPassword = document.getElementById('iqama-password').value;
 
       try {
+        // Add IQama to Firestore
         await addDoc(collection(db, "iqamas"), {
-          name,
-          region,
-          email,
-          phone,
-          password,
-          modiriyaId
+          region: iqamaRegion,
+          name: iqamaName,
+          modiriya: modiriyaSelect,
+          email: iqamaEmail,
+          phone: iqamaPhone,
         });
-
-        successAlert.classList.remove("hidden");
-        setTimeout(() => successAlert.classList.add("hidden"), 3000);
-        fetchIqamas();
+        showSuccessAlert("تم إضافة الإقامة بنجاح");
+        fetchIqamas();  // Update the table
       } catch (error) {
-        errorMessage.innerText = error.message;
-        errorAlert.classList.remove("hidden");
-        setTimeout(() => errorAlert.classList.add("hidden"), 3000);
+        showErrorAlert("حدث خطأ في إضافة الإقامة");
       }
     });
 
-    // Delete Modiriya
-    modiriyasList.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("delete-btn")) {
-        const modiriyaId = e.target.getAttribute("data-id");
-        try {
-          await deleteDoc(doc(db, "modiriyas", modiriyaId));
-          fetchModiriyas();
-        } catch (error) {
-          alert("حدث خطأ أثناء الحذف");
-        }
-      }
-    });
-
-    // Delete IQama
-    iqamasList.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("delete-btn")) {
-        const iqamaId = e.target.getAttribute("data-id");
-        try {
-          await deleteDoc(doc(db, "iqamas", iqamaId));
-          fetchIqamas();
-        } catch (error) {
-          alert("حدث خطأ أثناء الحذف");
-        }
-      }
-    });
-
-    // Initialize
+    // Initial fetch data
     fetchModiriyas();
     fetchIqamas();
   </script>
+
 </body>
 
 </html>
