@@ -19,6 +19,10 @@
         <!-- Login Form -->
         <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
+            
+            <!-- Alert Messages -->
+            <div id="alertMessage" class="hidden p-4 rounded-lg mb-4 text-center"></div>
+            
             <form id="loginForm" class="space-y-6">
                 <!-- Email -->
                 <div>
@@ -90,15 +94,22 @@
         // Handle login form submission
         document.getElementById("loginForm").addEventListener("submit", async function (event) {
             event.preventDefault();
-    
+
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
-    
+            const alertMessage = document.getElementById("alertMessage");
+
+            // Reset alert styles
+            alertMessage.classList.add("hidden");
+            alertMessage.classList.remove("bg-green-100", "text-green-700", "bg-red-100", "text-red-700");
+
             if (!email || !password) {
-                alert("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+                alertMessage.textContent = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
+                alertMessage.classList.add("bg-red-100", "text-red-700");
+                alertMessage.classList.remove("hidden");
                 return;
             }
-    
+
             try {
                 // Query Firestore for modiriya credentials
                 const modiriyaQuery = query(
@@ -106,24 +117,28 @@
                     where("email", "==", email),
                     where("password", "==", password)
                 );
-    
+
                 const modiriyaSnapshot = await getDocs(modiriyaQuery);
-    
+
                 if (modiriyaSnapshot.empty) {
-                    alert("فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.");
+                    alertMessage.textContent = "فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.";
+                    alertMessage.classList.add("bg-red-100", "text-red-700");
+                    alertMessage.classList.remove("hidden");
                     return;
                 }
-    
+
                 // Get the modiriya document and its ID
                 const modiriyaDoc = modiriyaSnapshot.docs[0];
                 const modiriyaId = modiriyaDoc.id;
-    
+
                 // Fetch iqamas related to the modiriya
                 const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaId));
                 const iqamasSnapshot = await getDocs(iqamasQuery);
 
                 if (iqamasSnapshot.empty) {
-                    alert("لا توجد بيانات للإقامات الجامعية لهذه المديرية.");
+                    alertMessage.textContent = "لا توجد بيانات للإقامات الجامعية لهذه المديرية.";
+                    alertMessage.classList.add("bg-red-100", "text-red-700");
+                    alertMessage.classList.remove("hidden");
                 } else {
                     const iqamasTableBody = document.getElementById("iqamasTableBody");
                     const tableHeader = document.getElementById("tableHeader");
@@ -149,15 +164,20 @@
                         row += "</tr>";
                         iqamasTableBody.innerHTML += row;
                     });
-                }
 
-                // Show iqamas table
-                document.getElementById("loginForm").classList.add("hidden");
-                document.getElementById("modiriyaContent").classList.remove("hidden");
-    
+                    alertMessage.textContent = "تم تسجيل الدخول بنجاح!";
+                    alertMessage.classList.add("bg-green-100", "text-green-700");
+                    alertMessage.classList.remove("hidden");
+
+                    // Show iqamas table
+                    document.getElementById("loginForm").classList.add("hidden");
+                    document.getElementById("modiriyaContent").classList.remove("hidden");
+                }
             } catch (error) {
                 console.error("Error logging in or fetching data:", error.message);
-                alert("حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.");
+                alertMessage.textContent = "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.";
+                alertMessage.classList.add("bg-red-100", "text-red-700");
+                alertMessage.classList.remove("hidden");
             }
         });
     </script>
