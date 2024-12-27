@@ -17,17 +17,17 @@
         </div>
 
         <!-- Login Form -->
-        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg transform transition-all hover:scale-105 duration-300">
+        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
             <form id="loginForm" class="space-y-6">
                 <!-- Email -->
-                <div class="mb-4">
+                <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
                     <input type="email" id="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل البريد الإلكتروني" required>
                 </div>
 
                 <!-- Password -->
-                <div class="mb-6">
+                <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
                     <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل كلمة المرور" required>
                 </div>
@@ -39,39 +39,18 @@
             </form>
         </div>
 
-        <!-- Modiriya Iqamat Data (Shown after login) -->
+        <!-- Iqamas Table -->
         <div id="modiriyaContent" class="mt-8 hidden">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800">الإقامات الجامعية الخاصة بالمديرية</h2>
-                <p class="text-gray-600 mt-2">إجمالي الإقامات: <span id="iqamatCount">3</span></p>
             </div>
-
-            <!-- Iqamat Table -->
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                    <thead class="bg-orange-500 text-white">
-                        <tr>
-                            <th class="px-6 py-3 text-left">إقامة</th>
-                            <th class="px-6 py-3 text-left">عدد الغرف</th>
-                            <th class="px-6 py-3 text-left">عدد الأسرة</th>
-                        </tr>
+                    <thead id="tableHeader" class="bg-orange-500 text-white">
+                        <!-- Header rows will be dynamically added -->
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="px-6 py-4 border-b">إقامة 1</td>
-                            <td class="px-6 py-4 border-b">10</td>
-                            <td class="px-6 py-4 border-b">20</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 border-b">إقامة 2</td>
-                            <td class="px-6 py-4 border-b">15</td>
-                            <td class="px-6 py-4 border-b">30</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 border-b">إقامة 3</td>
-                            <td class="px-6 py-4 border-b">8</td>
-                            <td class="px-6 py-4 border-b">16</td>
-                        </tr>
+                    <tbody id="iqamasTableBody">
+                        <!-- Rows will be dynamically added here -->
                     </tbody>
                 </table>
             </div>
@@ -82,9 +61,8 @@
     <script type="module">
         // Import Firebase dependencies
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
@@ -94,49 +72,95 @@
             messagingSenderId: "240286199373",
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
-
+    
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+    
+        // Headers mapping: Arabic labels with corresponding database keys
+        const headers = [
+            { label: "الاسم", key: "name" },
+            { label: "الموقع", key: "location" },
+            { label: "الهاتف", key: "phone" },
+            { label: "المنطقة", key: "region" },
+            // { label: "المديرية", key: "modiriya" },
+            { label: "البريد الإلكتروني", key: "email" }
+        ];
 
-        // Save admin credentials to Firestore (Run this manually once, then comment it out)
-        async function saveAdminCredentials() {
-            try {
-                await setDoc(doc(db, "admins", "modiriyaAdmin"), {
-                    email: "adminmodiriya@gmail.com",
-                    password: "modiriya"
-                });
-                console.log("Admin credentials saved.");
-            } catch (error) {
-                console.error("Error saving admin credentials:", error);
-            }
-        }
-
-      
-        saveAdminCredentials();
-
-  
+        // Handle login form submission
         document.getElementById("loginForm").addEventListener("submit", async function (event) {
-            event.preventDefault(); // Prevent page refresh
-
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-
+            event.preventDefault();
+    
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+    
+            if (!email || !password) {
+                alert("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+                return;
+            }
+    
             try {
-                // Authenticate user
-                await signInWithEmailAndPassword(auth, email, password);
+                // Query Firestore for modiriya credentials
+                const modiriyaQuery = query(
+                    collection(db, "modiriyas"),
+                    where("email", "==", email),
+                    where("password", "==", password)
+                );
+    
+                const modiriyaSnapshot = await getDocs(modiriyaQuery);
+    
+                if (modiriyaSnapshot.empty) {
+                    alert("فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.");
+                    return;
+                }
+    
+                // Get the modiriya document and its ID
+                const modiriyaDoc = modiriyaSnapshot.docs[0];
+                const modiriyaId = modiriyaDoc.id;
+    
+                // Fetch iqamas related to the modiriya
+                const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaId));
+                const iqamasSnapshot = await getDocs(iqamasQuery);
 
-                // Hide login form and show modiriya content
+                if (iqamasSnapshot.empty) {
+                    alert("لا توجد بيانات للإقامات الجامعية لهذه المديرية.");
+                } else {
+                    const iqamasTableBody = document.getElementById("iqamasTableBody");
+                    const tableHeader = document.getElementById("tableHeader");
+
+                    iqamasTableBody.innerHTML = ""; // Clear previous rows
+                    tableHeader.innerHTML = ""; // Clear previous header
+
+                    // Create table headers dynamically
+                    let headerRow = "<tr>";
+                    headers.forEach((header) => {
+                        headerRow += `<th class="px-6 py-3 text-right">${header.label}</th>`;
+                    });
+                    headerRow += "</tr>";
+                    tableHeader.innerHTML = headerRow;
+
+                    // Add rows dynamically
+                    iqamasSnapshot.forEach((doc) => {
+                        const iqama = doc.data();
+                        let row = "<tr>";
+                        headers.forEach((header) => {
+                            row += `<td class="px-6 py-4 border-b">${iqama[header.key] || "غير متوفر"}</td>`;
+                        });
+                        row += "</tr>";
+                        iqamasTableBody.innerHTML += row;
+                    });
+                }
+
+                // Show iqamas table
                 document.getElementById("loginForm").classList.add("hidden");
                 document.getElementById("modiriyaContent").classList.remove("hidden");
-                console.log("Login successful!");
+    
             } catch (error) {
-                console.error("Error logging in:", error.message);
-                alert("فشل تسجيل الدخول. تحقق من البريد الإلكتروني أو كلمة المرور.");
+                console.error("Error logging in or fetching data:", error.message);
+                alert("حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.");
             }
         });
     </script>
-
+    
 </body>
 </html>
