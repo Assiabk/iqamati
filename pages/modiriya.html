@@ -5,23 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المديرية الوطنية للخدمات الجامعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans">
+    <style>
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
 
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- Main Container -->
     <div class="container mx-auto p-6">
 
         <!-- Title -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 fade-in">
             <h1 class="text-4xl font-bold text-gray-800">المديرية الوطنية للخدمات الجامعية</h1>
-            <p class="text-gray-600 text-xl">تسجيل الدخول لإدارة الإقامات الجامعية</p>
+            <p class="text-gray-600 text-xl mt-2">تسجيل الدخول لإدارة الإقامات الجامعية</p>
         </div>
 
         <!-- Login Form -->
-        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <div id="loginSection" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg slide-up">
             <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
             
             <!-- Alert Messages -->
-            <div id="alertMessage" class="hidden p-4 rounded-lg mb-4 text-center"></div>
+            <div id="alertMessage" class="hidden p-4 rounded-lg mb-4 text-center transition duration-300"></div>
             
             <form id="loginForm" class="space-y-6">
                 <!-- Email -->
@@ -38,13 +68,46 @@
 
                 <!-- Login Button -->
                 <div class="text-center">
-                    <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition duration-300 w-full">تسجيل الدخول</button>
+                    <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition duration-300 w-full transform hover:scale-105">تسجيل الدخول</button>
                 </div>
             </form>
         </div>
 
-        <!-- Iqamas Table -->
-        <div id="modiriyaContent" class="mt-8 hidden">
+        <!-- Modiriya Info Section -->
+        <div id="modiriyaInfo" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mt-8 hidden slide-up">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-semibold text-gray-800">ملف المديرية</h2>
+                <p class="text-gray-600 text-lg">بيانات المديرية الوطنية للخدمات الجامعية</p>
+            </div>
+
+            <div class="flex flex-col items-center space-y-4">
+                <!-- Profile Image -->
+                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-orange-500 shadow-md">
+                    <img src="images/diwand.jpg" alt="Profile Image" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Name -->
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-gray-800">الاسم:</h3>
+                    <p id="modiriyaName" class="text-lg text-gray-600">غير متوفر</p>
+                </div>
+
+                <!-- Email -->
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-gray-800">البريد الإلكتروني:</h3>
+                    <p id="modiriyaEmail" class="text-lg text-gray-600">غير متوفر</p>
+                </div>
+
+                <!-- Password -->
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-gray-800">كلمة المرور:</h3>
+                    <p id="modiriyaPassword" class="text-lg text-gray-600">غير متوفر</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Iqamas Table Section -->
+        <div id="modiriyaContent" class="mt-8 hidden fade-in">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800">الإقامات الجامعية الخاصة بالمديرية</h2>
             </div>
@@ -63,11 +126,9 @@
     </div>
 
     <script type="module">
-        // Import Firebase dependencies
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
     
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -77,29 +138,16 @@
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
     
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-    
-        // Headers mapping: Arabic labels with corresponding database keys
-        const headers = [
-            { label: "الاسم", key: "name" },
-            { label: "الموقع", key: "location" },
-            { label: "الهاتف", key: "phone" },
-            { label: "المنطقة", key: "region" },
-            // { label: "المديرية", key: "modiriya" },
-            { label: "البريد الإلكتروني", key: "email" }
-        ];
 
-        // Handle login form submission
-        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
             event.preventDefault();
 
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
             const alertMessage = document.getElementById("alertMessage");
 
-            // Reset alert styles
             alertMessage.classList.add("hidden");
             alertMessage.classList.remove("bg-green-100", "text-green-700", "bg-red-100", "text-red-700");
 
@@ -111,7 +159,6 @@
             }
 
             try {
-                // Query Firestore for modiriya credentials
                 const modiriyaQuery = query(
                     collection(db, "modiriyas"),
                     where("email", "==", email),
@@ -127,12 +174,17 @@
                     return;
                 }
 
-                // Get the modiriya document and its ID
                 const modiriyaDoc = modiriyaSnapshot.docs[0];
-                const modiriyaId = modiriyaDoc.id;
+                const modiriyaData = modiriyaDoc.data();
 
-                // Fetch iqamas related to the modiriya
-                const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaId));
+                document.getElementById("modiriyaName").textContent = modiriyaData.name || "غير متوفر";
+                document.getElementById("modiriyaEmail").textContent = modiriyaData.email || "غير متوفر";
+                document.getElementById("modiriyaPassword").textContent = modiriyaData.password || "غير متوفر";
+
+                document.getElementById("loginSection").classList.add("hidden");
+                document.getElementById("modiriyaInfo").classList.remove("hidden");
+
+                const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaDoc.id));
                 const iqamasSnapshot = await getDocs(iqamasQuery);
 
                 if (iqamasSnapshot.empty) {
@@ -143,10 +195,17 @@
                     const iqamasTableBody = document.getElementById("iqamasTableBody");
                     const tableHeader = document.getElementById("tableHeader");
 
-                    iqamasTableBody.innerHTML = ""; // Clear previous rows
-                    tableHeader.innerHTML = ""; // Clear previous header
+                    iqamasTableBody.innerHTML = "";
+                    tableHeader.innerHTML = "";
 
-                    // Create table headers dynamically
+                    const headers = [
+                        { label: "الاسم", key: "name" },
+                        { label: "الموقع", key: "location" },
+                        { label: "الهاتف", key: "phone" },
+                        { label: "المنطقة", key: "region" },
+                        { label: "البريد الإلكتروني", key: "email" }
+                    ];
+
                     let headerRow = "<tr>";
                     headers.forEach((header) => {
                         headerRow += `<th class="px-6 py-3 text-right">${header.label}</th>`;
@@ -154,7 +213,6 @@
                     headerRow += "</tr>";
                     tableHeader.innerHTML = headerRow;
 
-                    // Add rows dynamically
                     iqamasSnapshot.forEach((doc) => {
                         const iqama = doc.data();
                         let row = "<tr>";
@@ -165,16 +223,10 @@
                         iqamasTableBody.innerHTML += row;
                     });
 
-                    alertMessage.textContent = "تم تسجيل الدخول بنجاح!";
-                    alertMessage.classList.add("bg-green-100", "text-green-700");
-                    alertMessage.classList.remove("hidden");
-
-                    // Show iqamas table
-                    document.getElementById("loginForm").classList.add("hidden");
                     document.getElementById("modiriyaContent").classList.remove("hidden");
                 }
             } catch (error) {
-                console.error("Error logging in or fetching data:", error.message);
+                console.error("Error:", error);
                 alertMessage.textContent = "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.";
                 alertMessage.classList.add("bg-red-100", "text-red-700");
                 alertMessage.classList.remove("hidden");
