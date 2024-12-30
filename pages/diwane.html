@@ -67,6 +67,10 @@
           <label for="modiriya-phone" class="block text-gray-700">رقم الهاتف:</label>
           <input type="text" id="modiriya-phone" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل رقم الهاتف" required>
         </div>
+        <div>
+          <label for="modiriya-password" class="block text-gray-700">كلمة السر:</label>
+          <input type="password" id="modiriya-password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل كلمة السر" required>
+        </div>
         <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition duration-300">
           إضافة
         </button>
@@ -104,6 +108,10 @@
           <label for="iqama-phone" class="block text-gray-700">رقم الهاتف:</label>
           <input type="text" id="iqama-phone" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل رقم الهاتف" required>
         </div>
+        <div>
+          <label for="iqama-password" class="block text-gray-700">كلمة السر:</label>
+          <input type="password" id="iqama-password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="أدخل كلمة السر" required>
+        </div>
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">
           إضافة
         </button>
@@ -122,6 +130,7 @@
               <th class="px-4 py-2 border">المقر</th>
               <th class="px-4 py-2 border">البريد الإلكتروني</th>
               <th class="px-4 py-2 border">رقم الهاتف</th>
+              <th class="px-4 py-2 border">كلمة السر</th>
             </tr>
           </thead>
           <tbody id="modiriyas-table-body">
@@ -143,6 +152,7 @@
               <th class="px-4 py-2 border">المقر</th>
               <th class="px-4 py-2 border">البريد الإلكتروني</th>
               <th class="px-4 py-2 border">رقم الهاتف</th>
+              <th class="px-4 py-2 border">كلمة السر</th>
             </tr>
           </thead>
           <tbody id="iqamas-table-body">
@@ -154,178 +164,183 @@
   </div>
 
   <script type="module">
-   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
-  authDomain: "iqamatisite.firebaseapp.com",
-  projectId: "iqamatisite",
-  storageBucket: "iqamatisite.firebasestorage.app",
-  messagingSenderId: "240286199373",
-  appId: "1:240286199373:web:c1c9b01529edf378f33604"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-document.addEventListener("DOMContentLoaded", () => {
-  const addModiriyaBtn = document.getElementById("add-modiriya-btn");
-  const addIqamaBtn = document.getElementById("add-iqama-btn");
-  const modiriyaFormContainer = document.getElementById("modiriya-form-container");
-  const iqamaFormContainer = document.getElementById("iqama-form-container");
-
-  // Event listeners to toggle visibility of forms
-  addModiriyaBtn.addEventListener("click", () => {
-    iqamaFormContainer.classList.add("hidden");
-    modiriyaFormContainer.classList.toggle("hidden");
-  });
-
-  addIqamaBtn.addEventListener("click", () => {
-    modiriyaFormContainer.classList.add("hidden");
-    iqamaFormContainer.classList.toggle("hidden");
-  });
-
-  // Fetch data and populate tables and select dropdown
-  loadModiriyas();
-  loadIqamas();
-  populateModiriyaOptions();
-
-  // Form submission listeners
-  document.getElementById("add-modiriya-form").addEventListener("submit", addModiriya);
-  document.getElementById("add-iqama-form").addEventListener("submit", addIqama);
-});
-
-// Load and display modiriyas
-async function loadModiriyas() {
-  const modiriyasSnapshot = await getDocs(query(collection(db, "modiriyas"), orderBy("name")));
-  const modiriyasTableBody = document.getElementById("modiriyas-table-body");
-  modiriyasTableBody.innerHTML = "";
-
-  modiriyasSnapshot.forEach((docSnap) => {
-    const modiriya = docSnap.data();
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="px-4 py-2 border">${modiriya.region}</td>
-      <td class="px-4 py-2 border">${modiriya.name}</td>
-      <td class="px-4 py-2 border">${modiriya.location}</td>
-      <td class="px-4 py-2 border">${modiriya.email}</td>
-      <td class="px-4 py-2 border">${modiriya.phone}</td>
-    `;
-    modiriyasTableBody.appendChild(row);
-  });
-}
-
-// Load and display iqamas with modiriya name
-async function loadIqamas() {
-  const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
-  const iqamasTableBody = document.getElementById("iqamas-table-body");
-  iqamasTableBody.innerHTML = "";
-
-  for (const docSnap of iqamasSnapshot.docs) {
-    const iqama = docSnap.data();
-    let modiriyaName = "Unknown";  // Default value if modiriya is not found
-
-    if (iqama.modiriya) {
-      const modiriyaRef = doc(db, "modiriyas", iqama.modiriya);
-      const modiriyaDoc = await getDoc(modiriyaRef);
-
-      if (modiriyaDoc.exists()) {
-        modiriyaName = modiriyaDoc.data().name;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, getDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+  
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+      authDomain: "iqamatisite.firebaseapp.com",
+      projectId: "iqamatisite",
+      storageBucket: "iqamatisite.firebasestorage.app",
+      messagingSenderId: "240286199373",
+      appId: "1:240286199373:web:c1c9b01529edf378f33604"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      const addModiriyaBtn = document.getElementById("add-modiriya-btn");
+      const addIqamaBtn = document.getElementById("add-iqama-btn");
+      const modiriyaFormContainer = document.getElementById("modiriya-form-container");
+      const iqamaFormContainer = document.getElementById("iqama-form-container");
+  
+      // Event listeners to toggle visibility of forms
+      addModiriyaBtn.addEventListener("click", () => {
+        iqamaFormContainer.classList.add("hidden");
+        modiriyaFormContainer.classList.toggle("hidden");
+      });
+  
+      addIqamaBtn.addEventListener("click", () => {
+        modiriyaFormContainer.classList.add("hidden");
+        iqamaFormContainer.classList.toggle("hidden");
+      });
+  
+      // Fetch data and populate tables and select dropdown
+      loadModiriyas();
+      loadIqamas();
+      populateModiriyaOptions();
+  
+      // Form submission listeners
+      document.getElementById("add-modiriya-form").addEventListener("submit", addModiriya);
+      document.getElementById("add-iqama-form").addEventListener("submit", addIqama);
+    });
+  
+    // Load and display modiriyas
+    async function loadModiriyas() {
+      const modiriyasSnapshot = await getDocs(query(collection(db, "modiriyas"), orderBy("name")));
+      const modiriyasTableBody = document.getElementById("modiriyas-table-body");
+      modiriyasTableBody.innerHTML = "";
+  
+      modiriyasSnapshot.forEach((docSnap) => {
+        const modiriya = docSnap.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-4 py-2 border">${modiriya.region}</td>
+          <td class="px-4 py-2 border">${modiriya.name}</td>
+          <td class="px-4 py-2 border">${modiriya.location}</td>
+          <td class="px-4 py-2 border">${modiriya.email}</td>
+          <td class="px-4 py-2 border">${modiriya.phone}</td>
+          <td class="px-4 py-2 border">${modiriya.password}</td> <!-- Display password -->
+        `;
+        modiriyasTableBody.appendChild(row);
+      });
+    }
+  
+    // Load and display iqamas with modiriya name
+    async function loadIqamas() {
+      const iqamasSnapshot = await getDocs(collection(db, "iqamas"));
+      const iqamasTableBody = document.getElementById("iqamas-table-body");
+      iqamasTableBody.innerHTML = "";
+  
+      for (const docSnap of iqamasSnapshot.docs) {
+        const iqama = docSnap.data();
+        let modiriyaName = "Unknown";  // Default value if modiriya is not found
+  
+        if (iqama.modiriya) {
+          const modiriyaRef = doc(db, "modiriyas", iqama.modiriya);
+          const modiriyaDoc = await getDoc(modiriyaRef);
+  
+          if (modiriyaDoc.exists()) {
+            modiriyaName = modiriyaDoc.data().name;
+          }
+        }
+  
+        iqamasTableBody.innerHTML += `
+          <tr>
+            <td class="px-4 py-2 border">${iqama.region}</td>
+            <td class="px-4 py-2 border">${iqama.name}</td>
+            <td class="px-4 py-2 border">${modiriyaName}</td>
+            <td class="px-4 py-2 border">${iqama.location}</td>
+            <td class="px-4 py-2 border">${iqama.email}</td>
+            <td class="px-4 py-2 border">${iqama.phone}</td>
+            <td class="px-4 py-2 border">${iqama.password}</td> <!-- Display password -->
+          </tr>
+        `;
       }
     }
-
-    iqamasTableBody.innerHTML += `
-      <tr>
-        <td class="px-4 py-2 border">${iqama.region}</td>
-        <td class="px-4 py-2 border">${iqama.name}</td>
-        <td class="px-4 py-2 border">${modiriyaName}</td>
-        <td class="px-4 py-2 border">${iqama.location}</td>
-        <td class="px-4 py-2 border">${iqama.email}</td>
-        <td class="px-4 py-2 border">${iqama.phone}</td>
-      </tr>
-    `;
-  }
-}
-
-// Populate the modiriya dropdown for iqama form
-async function populateModiriyaOptions() {
-  const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
-  const modiriyasSelect = document.getElementById("modiriya-select");
-  modiriyasSelect.innerHTML = '<option value="" disabled selected>اختار المديرية</option>';
-
-  modiriyasSnapshot.forEach((docSnap) => {
-    const modiriya = docSnap.data();
-    const option = document.createElement("option");
-    option.value = docSnap.id;  // Use document ID as the value
-    option.textContent = modiriya.name;
-    modiriyasSelect.appendChild(option);
-  });
-}
-
-// Add modiriya to Firestore
-async function addModiriya(event) {
-  event.preventDefault();
-
-  const region = document.getElementById("modiriya-region").value;
-  const name = document.getElementById("modiriya-name").value;
-  const location = document.getElementById("modiriya-location").value;
-  const email = document.getElementById("modiriya-email").value;
-  const phone = document.getElementById("modiriya-phone").value;
-
-  try {
-    await addDoc(collection(db, "modiriyas"), { region, name, location, email, phone });
-    showAlert("success", "تم إضافة المديرية بنجاح");
-    loadModiriyas();
-  } catch (error) {
-    showAlert("error", "حدث خطأ أثناء إضافة المديرية");
-    console.error("Error adding modiriya:", error);
-  }
-}
-
-// Add iqama to Firestore
-async function addIqama(event) {
-  event.preventDefault();
-
-  const region = document.getElementById("iqama-region").value;
-  const name = document.getElementById("iqama-name").value;
-  const modiriyaId = document.getElementById("modiriya-select").value;  // Fetch modiriya ID
-  const location = document.getElementById("iqama-location").value;
-  const email = document.getElementById("iqama-email").value;
-  const phone = document.getElementById("iqama-phone").value;
-
-  try {
-    await addDoc(collection(db, "iqamas"), { region, name, modiriya: modiriyaId, location, email, phone });
-    showAlert("success", "تم إضافة الإقامة بنجاح");
-    loadIqamas();
-  } catch (error) {
-    showAlert("error", "حدث خطأ أثناء إضافة الإقامة");
-    console.error("Error adding iqama:", error);
-  }
-}
-
-// Show success or error alerts
-function showAlert(type, message) {
-  const alertContainer = document.createElement("div");
-  alertContainer.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-md text-white w-80 text-center shadow-lg`;
-
-  if (type === "success") {
-    alertContainer.classList.add("bg-green-500");
-  } else if (type === "error") {
-    alertContainer.classList.add("bg-red-500");
-  }
-
-  alertContainer.textContent = message;
-  document.body.appendChild(alertContainer);
-
-  setTimeout(() => {
-    alertContainer.remove();
-  }, 3000);
-}
-
+  
+    // Populate the modiriya dropdown for iqama form
+    async function populateModiriyaOptions() {
+      const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
+      const modiriyasSelect = document.getElementById("modiriya-select");
+      modiriyasSelect.innerHTML = '<option value="" disabled selected>اختار المديرية</option>';
+  
+      modiriyasSnapshot.forEach((docSnap) => {
+        const modiriya = docSnap.data();
+        const option = document.createElement("option");
+        option.value = docSnap.id;  // Use document ID as the value
+        option.textContent = modiriya.name;
+        modiriyasSelect.appendChild(option);
+      });
+    }
+  
+    // Add modiriya to Firestore
+    async function addModiriya(event) {
+      event.preventDefault();
+  
+      const region = document.getElementById("modiriya-region").value;
+      const name = document.getElementById("modiriya-name").value;
+      const location = document.getElementById("modiriya-location").value;
+      const email = document.getElementById("modiriya-email").value;
+      const phone = document.getElementById("modiriya-phone").value;
+      const password = document.getElementById("modiriya-password").value;  // Get password
+  
+      try {
+        await addDoc(collection(db, "modiriyas"), { region, name, location, email, phone, password });
+        showAlert("success", "تم إضافة المديرية بنجاح");
+        loadModiriyas();
+      } catch (error) {
+        showAlert("error", "حدث خطأ أثناء إضافة المديرية");
+        console.error("Error adding modiriya:", error);
+      }
+    }
+  
+    // Add iqama to Firestore
+    async function addIqama(event) {
+      event.preventDefault();
+  
+      const region = document.getElementById("iqama-region").value;
+      const name = document.getElementById("iqama-name").value;
+      const modiriyaId = document.getElementById("modiriya-select").value;  // Fetch modiriya ID
+      const location = document.getElementById("iqama-location").value;
+      const email = document.getElementById("iqama-email").value;
+      const phone = document.getElementById("iqama-phone").value;
+      const password = document.getElementById("iqama-password").value;  // Get password
+  
+      try {
+        await addDoc(collection(db, "iqamas"), { region, name, modiriya: modiriyaId, location, email, phone, password });
+        showAlert("success", "تم إضافة الإقامة بنجاح");
+        loadIqamas();
+      } catch (error) {
+        showAlert("error", "حدث خطأ أثناء إضافة الإقامة");
+        console.error("Error adding iqama:", error);
+      }
+    }
+  
+    // Show success or error alerts
+    function showAlert(type, message) {
+      const alertContainer = document.createElement("div");
+      alertContainer.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-md text-white w-80 text-center shadow-lg`;
+  
+      if (type === "success") {
+        alertContainer.classList.add("bg-green-500");
+      } else if (type === "error") {
+        alertContainer.classList.add("bg-red-500");
+      }
+  
+      alertContainer.textContent = message;
+      document.body.appendChild(alertContainer);
+  
+      setTimeout(() => {
+        alertContainer.remove();
+      }, 3000);
+    }
+  
   </script>
+  
 </body>
 
 </html>
