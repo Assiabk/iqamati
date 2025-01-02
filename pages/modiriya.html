@@ -98,11 +98,12 @@
                     <p id="modiriyaEmail" class="text-lg text-gray-600">غير متوفر</p>
                 </div>
 
-                <!-- Password -->
-                <div class="text-center">
-                    <h3 class="text-xl font-semibold text-gray-800">كلمة المرور:</h3>
-                    <p id="modiriyaPassword" class="text-lg text-gray-600">غير متوفر</p>
-                </div>
+                <!-- مقر -->
+<div class="text-center">
+    <h3 class="text-xl font-semibold text-gray-800">المقر:</h3>
+    <p id="modiriyaLocation" class="text-lg text-gray-600">غير متوفر</p>
+</div>
+
             </div>
         </div>
 
@@ -179,7 +180,8 @@
 
                 document.getElementById("modiriyaName").textContent = modiriyaData.name || "غير متوفر";
                 document.getElementById("modiriyaEmail").textContent = modiriyaData.email || "غير متوفر";
-                document.getElementById("modiriyaPassword").textContent = modiriyaData.password || "غير متوفر";
+                document.getElementById("modiriyaLocation").textContent = modiriyaData.location || "غير متوفر";
+
 
                 document.getElementById("loginSection").classList.add("hidden");
                 document.getElementById("modiriyaInfo").classList.remove("hidden");

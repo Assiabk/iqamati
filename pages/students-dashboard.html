@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الإقامات الجامعية</title>
+    <title>إدارة الإقامات الجامعية|الطلاب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes fadeIn {
@@ -92,7 +92,10 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                     <input type="number" id="bedCount" placeholder="عدد الأسرة"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-                    <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 w-full">إضافة الطالب</button>
+                        <input type="number" id="chairCount" placeholder="عدد الكراسي" class="w-full px-4 py-2 border rounded-lg" required>
+                        <input type="number" id="tableCount" placeholder="عدد الطاولات" class="w-full px-4 py-2 border rounded-lg" required>
+
+                        <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 w-full">إضافة الطالب</button>
                 </form>
             </div>
 
@@ -105,6 +108,9 @@
                             <th class="py-2 px-4">الغرفة</th>
                             <th class="py-2 px-4">عدد الطلاب في الغرفة</th>
                             <th class="py-2 px-4">عدد الأسرة</th>
+                            <th class="py-2 px-4">عدد الكراسي</th>
+<th class="py-2 px-4">عدد الطاولات</th>
+
                             <th class="py-2 px-4">الإجراءات</th>
                         </tr>
                     </thead>
@@ -131,196 +137,199 @@
 <div id="alertMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 hidden w-11/12 md:w-1/2 lg:w-1/3 text-center p-4 rounded-lg shadow-lg transition duration-300 z-50">
 </div>
 <script type="module">
-import { 
-    initializeApp 
-} from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
-
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    query, 
-    where, 
-    addDoc, 
-    updateDoc, 
-    deleteDoc, 
-    doc 
-} from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
-
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
-    authDomain: "iqamatisite.firebaseapp.com",
-    projectId: "iqamatisite",
-    storageBucket: "iqamatisite.appspot.com",
-    messagingSenderId: "240286199373",
-    appId: "1:240286199373:web:c1c9b01529edf378f33604",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Firebase Collections
-const iqamasCollection = collection(db, "iqamas");
-const studentsCollection = collection(db, "students");
-
-// DOM Elements
-const studentsTableBody = document.querySelector("#studentsTable tbody");
-const alertContainer = document.getElementById("alertMessage");
-const loginSection = document.getElementById("loginSection");
-const mainContent = document.getElementById("mainContent");
-const addStudentForm = document.getElementById("addStudentForm");
-const loginForm = document.getElementById("loginForm");
-
-// State Variables
-let selectedStudentId = null;
-let currentIqamaId = null;
-
-// Reusable Alert Function
-function showAlert(message, type) {
-    alertContainer.textContent = message;
-
-    // Apply styles based on alert type
-    alertContainer.className = `fixed top-4 left-1/2 transform -translate-x-1/2 w-11/12 md:w-1/2 lg:w-1/3 text-center p-4 rounded-lg shadow-lg transition duration-300 z-50 ${
-        type === "success"
-            ? "bg-green-500 text-white border-l-4 border-green-700"
-            : "bg-red-500 text-white border-l-4 border-red-700"
-    }`;
-
-    // Show the alert
-    alertContainer.classList.remove("hidden");
-
-    // Automatically hide after 3 seconds
-    setTimeout(() => {
-        alertContainer.classList.add("hidden");
-    }, 3000);
-}
-
-// Fetch and Display Students
-async function fetchStudents() {
-    studentsTableBody.innerHTML = "";
-    try {
-        const querySnapshot = await getDocs(query(studentsCollection, where("iqamaId", "==", currentIqamaId)));
-        querySnapshot.forEach((doc) => {
-            const student = doc.data();
-            studentsTableBody.innerHTML += `
-                <tr class="hover:bg-gray-100 transition duration-300">
-                    <td class="py-2 px-4">${student.name}</td>
-                    <td class="py-2 px-4">${student.room}</td>
-                    <td class="py-2 px-4">${student.studentCount}</td>
-                    <td class="py-2 px-4">${student.bedCount}</td>
-                    <td class="py-2 px-4">
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" onclick="editStudent('${doc.id}', '${student.name}', '${student.room}', ${student.studentCount}, ${student.bedCount})">
-                            تعديل
-                        </button>
-                        <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="confirmDeleteStudent('${doc.id}')">
-                            حذف
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-    } catch (error) {
-        console.error("Error fetching students:", error);
-        showAlert("حدث خطأ أثناء تحميل البيانات", "error");
-    }
-}
-
-// Add or Edit Student
-addStudentForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const name = document.getElementById("studentName").value.trim();
-    const room = document.getElementById("roomNumber").value.trim();
-    const studentCount = document.getElementById("studentCount").value.trim();
-    const bedCount = document.getElementById("bedCount").value.trim();
-
-    if (!name || !room || !studentCount || !bedCount) {
-        showAlert("يرجى تعبئة جميع الحقول", "error");
-        return;
-    }
-
-    try {
-        if (selectedStudentId) {
-            await updateDoc(doc(db, "students", selectedStudentId), { name, room, studentCount, bedCount });
-            showAlert("تم تحديث الطالب بنجاح", "success");
-        } else {
-            await addDoc(studentsCollection, { name, room, studentCount, bedCount, iqamaId: currentIqamaId });
-            showAlert("تم إضافة الطالب بنجاح", "success");
-        }
-        fetchStudents();
-        addStudentForm.reset();
-        selectedStudentId = null;
-    } catch (error) {
-        console.error("Error saving student:", error);
-        showAlert("حدث خطأ أثناء حفظ البيانات", "error");
-    }
-});
-
-// Edit Student
-window.editStudent = function (id, name, room, studentCount, bedCount) {
-    selectedStudentId = id;
-    document.getElementById("studentName").value = name;
-    document.getElementById("roomNumber").value = room;
-    document.getElementById("studentCount").value = studentCount;
-    document.getElementById("bedCount").value = bedCount;
-};
-
-// Delete Student Confirmation
-window.confirmDeleteStudent = function (id) {
-    const modal = document.getElementById("deleteConfirmationModal");
-    const confirmButton = document.getElementById("confirmDeleteButton");
-    const cancelButton = document.getElementById("cancelDeleteButton");
-
-    modal.classList.remove("hidden");
-
-    confirmButton.onclick = async () => {
-        try {
-            await deleteDoc(doc(db, "students", id));
-            showAlert("تم حذف الطالب بنجاح", "success");
-            fetchStudents();
-        } catch (error) {
-            console.error("Error deleting student:", error);
-            showAlert("حدث خطأ أثناء الحذف", "error");
-        } finally {
-            modal.classList.add("hidden");
-        }
+    import { 
+        initializeApp 
+    } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+    
+    import { 
+        getFirestore, 
+        collection, 
+        getDocs, 
+        query, 
+        where, 
+        addDoc, 
+        updateDoc, 
+        deleteDoc, 
+        doc 
+    } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+    
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+        authDomain: "iqamatisite.firebaseapp.com",
+        projectId: "iqamatisite",
+        storageBucket: "iqamatisite.appspot.com",
+        messagingSenderId: "240286199373",
+        appId: "1:240286199373:web:c1c9b01529edf378f33604",
     };
-
-    cancelButton.onclick = () => modal.classList.add("hidden");
-};
-
-// Login Form Handler
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    try {
-        const iqamaQuery = query(iqamasCollection, where("email", "==", email), where("password", "==", password));
-        const querySnapshot = await getDocs(iqamaQuery);
-
-        if (!querySnapshot.empty) {
-            const iqamaData = querySnapshot.docs[0].data();
-            currentIqamaId = querySnapshot.docs[0].id;
-
-            showAlert("تم تسجيل الدخول بنجاح", "success");
-            loginSection.classList.add("hidden");
-            mainContent.classList.remove("hidden");
-
-            fetchStudents();
-        } else {
-            showAlert("فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.", "error");
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        showAlert("حدث خطأ أثناء تسجيل الدخول", "error");
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Firebase Collections
+    const iqamasCollection = collection(db, "iqamas");
+    const studentsCollection = collection(db, "students");
+    
+    // DOM Elements
+    const studentsTableBody = document.querySelector("#studentsTable tbody");
+    const alertContainer = document.getElementById("alertMessage");
+    const loginSection = document.getElementById("loginSection");
+    const mainContent = document.getElementById("mainContent");
+    const addStudentForm = document.getElementById("addStudentForm");
+    const loginForm = document.getElementById("loginForm");
+    
+    // State Variables
+    let selectedStudentId = null;
+    let currentIqamaId = null;
+    
+    // Show alert message
+    function showAlert(message, type) {
+        alertContainer.textContent = message;
+    
+        alertContainer.className = `fixed top-4 left-1/2 transform -translate-x-1/2 w-11/12 md:w-1/2 lg:w-1/3 text-center p-4 rounded-lg shadow-lg transition duration-300 z-50 ${
+            type === "success"
+                ? "bg-green-500 text-white border-l-4 border-green-700"
+                : "bg-red-500 text-white border-l-4 border-red-700"
+        }`;
+    
+        alertContainer.classList.remove("hidden");
+    
+        setTimeout(() => {
+            alertContainer.classList.add("hidden");
+        }, 3000);
     }
-});
-
-   </script> 
+    
+    // Fetch and display students
+    async function fetchStudents() {
+        studentsTableBody.innerHTML = "";
+        try {
+            const querySnapshot = await getDocs(query(studentsCollection, where("iqamaId", "==", currentIqamaId)));
+            querySnapshot.forEach((doc) => {
+                const student = doc.data();
+                studentsTableBody.innerHTML += `
+                    <tr class="hover:bg-gray-100 transition duration-300">
+                        <td class="py-2 px-4">${student.name}</td>
+                        <td class="py-2 px-4">${student.room}</td>
+                        <td class="py-2 px-4">${student.studentCount}</td>
+                        <td class="py-2 px-4">${student.bedCount}</td>
+                        <td class="py-2 px-4">${student.chairCount}</td>
+                        <td class="py-2 px-4">${student.tableCount}</td>
+                        <td class="py-2 px-4">
+                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" onclick="editStudent('${doc.id}', '${student.name}', '${student.room}', ${student.studentCount}, ${student.bedCount}, ${student.chairCount}, ${student.tableCount})">
+                                تعديل
+                            </button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="confirmDeleteStudent('${doc.id}')">
+                                حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Error fetching students:", error);
+            showAlert("حدث خطأ أثناء تحميل البيانات", "error");
+        }
+    }
+    
+    // Add or edit student
+    addStudentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+    
+        const name = document.getElementById("studentName").value.trim();
+        const room = document.getElementById("roomNumber").value.trim();
+        const studentCount = document.getElementById("studentCount").value.trim();
+        const bedCount = document.getElementById("bedCount").value.trim();
+        const chairCount = parseInt(document.getElementById("chairCount").value);
+        const tableCount = parseInt(document.getElementById("tableCount").value);
+    
+        if (!name || !room || !studentCount || !bedCount || isNaN(chairCount) || isNaN(tableCount)) {
+            showAlert("يرجى تعبئة جميع الحقول", "error");
+            return;
+        }
+    
+        try {
+            if (selectedStudentId) {
+                await updateDoc(doc(db, "students", selectedStudentId), { name, room, studentCount, bedCount, chairCount, tableCount });
+                showAlert("تم تحديث الطالب بنجاح", "success");
+            } else {
+                await addDoc(studentsCollection, { name, room, studentCount, bedCount, chairCount, tableCount, iqamaId: currentIqamaId });
+                showAlert("تم إضافة الطالب بنجاح", "success");
+            }
+            fetchStudents();
+            addStudentForm.reset();
+            selectedStudentId = null;
+        } catch (error) {
+            console.error("Error saving student:", error);
+            showAlert("حدث خطأ أثناء حفظ البيانات", "error");
+        }
+    });
+    
+    // Edit student
+    window.editStudent = function (id, name, room, studentCount, bedCount, chairCount, tableCount) {
+        selectedStudentId = id;
+        document.getElementById("studentName").value = name;
+        document.getElementById("roomNumber").value = room;
+        document.getElementById("studentCount").value = studentCount;
+        document.getElementById("bedCount").value = bedCount;
+        document.getElementById("chairCount").value = chairCount;
+        document.getElementById("tableCount").value = tableCount;
+    };
+    
+    // Confirm delete student
+    window.confirmDeleteStudent = function (id) {
+        const modal = document.getElementById("deleteConfirmationModal");
+        const confirmButton = document.getElementById("confirmDeleteButton");
+        const cancelButton = document.getElementById("cancelDeleteButton");
+    
+        modal.classList.remove("hidden");
+    
+        confirmButton.onclick = async () => {
+            try {
+                await deleteDoc(doc(db, "students", id));
+                showAlert("تم حذف الطالب بنجاح", "success");
+                fetchStudents();
+            } catch (error) {
+                console.error("Error deleting student:", error);
+                showAlert("حدث خطأ أثناء الحذف", "error");
+            } finally {
+                modal.classList.add("hidden");
+            }
+        };
+    
+        cancelButton.onclick = () => modal.classList.add("hidden");
+    };
+    
+    // Login form handler
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+    
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+    
+        try {
+            const iqamaQuery = query(iqamasCollection, where("email", "==", email), where("password", "==", password));
+            const querySnapshot = await getDocs(iqamaQuery);
+    
+            if (!querySnapshot.empty) {
+                const iqamaData = querySnapshot.docs[0].data();
+                currentIqamaId = querySnapshot.docs[0].id;
+    
+                showAlert("تم تسجيل الدخول بنجاح", "success");
+                loginSection.classList.add("hidden");
+                mainContent.classList.remove("hidden");
+    
+                fetchStudents();
+            } else {
+                showAlert("فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.", "error");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            showAlert("حدث خطأ أثناء تسجيل الدخول", "error");
+        }
+    });
+    </script>
+    
 
 </body>
 </html>
