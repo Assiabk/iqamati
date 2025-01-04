@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل العمال</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 space-y-8">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-800">تسجيل العمال</h1>
+        </div>
+
+        <!-- Worker Registration Form -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">إضافة عامل جديد</h2>
+            <form id="worker-form" class="space-y-4">
+                <div>
+                    <label for="worker-name" class="block text-gray-600">اسم العامل</label>
+                    <input type="text" id="worker-name" name="worker-name" required class="w-full p-2 rounded-lg border border-gray-300">
+                </div>
+                <div>
+                    <label for="worker-password" class="block text-gray-600">كلمة المرور</label>
+                    <input type="password" id="worker-password" name="worker-password" required class="w-full p-2 rounded-lg border border-gray-300">
+                    <p id="password-error" class="text-red-500 text-sm hidden">يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.</p>
+                </div>
+                <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">تسجيل العامل</button>
+            </form>
+        </div>
+
+        <!-- Worker List -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">قائمة العمال المسجلين</h2>
+            <ul id="worker-list" class="space-y-4">
+                <!-- Worker List Items will be dynamically added here -->
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Array to store worker data
+        let workers = [];
+
+        // Handle the form submission
+        document.getElementById('worker-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get the form data
+            const name = document.getElementById('worker-name').value;
+            const password = document.getElementById('worker-password').value;
+
+            // Check if the password is at least 8 characters long
+            if (password.length < 8) {
+                document.getElementById('password-error').classList.remove('hidden');
+                return; // Stop the form from being submitted if password is too short
+            } else {
+                document.getElementById('password-error').classList.add('hidden');
+            }
+
+            // Add the new worker to the workers array
+            workers.push({ name, password });
+
+            // Clear the form fields
+            document.getElementById('worker-name').value = '';
+            document.getElementById('worker-password').value = '';
+
+            // Update the worker list display
+            displayWorkerList();
+        });
+
+        // Function to display the list of workers
+        function displayWorkerList() {
+            const workerList = document.getElementById('worker-list');
+            workerList.innerHTML = ''; // Clear the list before updating
+
+            workers.forEach(worker => {
+                const li = document.createElement('li');
+                li.classList.add('p-4', 'bg-gray-50', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200', 'hover:bg-gray-100');
+                li.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <strong class="text-gray-700">اسم العامل:</strong> <span class="text-gray-600">${worker.name}</span>
+                        </div>
+                        <div>
+                            <strong class="text-gray-700">كلمة المرور:</strong> <span class="text-gray-600">${worker.password}</span>
+                        </div>
+                    </div>
+                `;
+                workerList.appendChild(li);
+            });
+        }
+    </script>
+
+</body>
+
+</html>
