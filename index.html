@@ -8,16 +8,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Firebase Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-
-    <!-- Firebase Configuration -->
     <script type="module">
-        // Import the functions you need from the SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        // Firebase SDK setup
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -29,6 +26,45 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        const db = getFirestore(app);
+
+        // Function to open file input dialog when image is clicked
+        window.changeImage = function(cardId) {
+            document.getElementById(`file-${cardId}`).click();
+        };
+
+        // Function to upload and update the image in Firebase Storage and store URL in Firestore
+        window.uploadImage = async function(cardId) {
+            const fileInput = document.getElementById(`file-${cardId}`);
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Show a loading message or icon (optional)
+            document.getElementById(`loading-${cardId}`).style.display = 'block';
+
+            // Upload the image to Firebase Storage
+            const storageRef = ref(storage, `images/${cardId}/${file.name}`);
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+
+            // Update the image URL in the card
+            document.getElementById(`img-${cardId}`).src = downloadURL;
+
+            // Store the image URL in Firestore
+            await addDoc(collection(db, "cards"), {
+                cardId: cardId,
+                imageUrl: downloadURL
+            });
+
+            // Hide loading icon after upload
+            document.getElementById(`loading-${cardId}`).style.display = 'none';
+        };
+
+        // Function to navigate to another page
+        window.navigateToPage = function(url) {
+            window.location.href = url;
+        };
     </script>
 
     <title>إدارة اقامتي</title>
@@ -46,45 +82,46 @@
     <div class="max-w-7xl mx-auto px-4 mt-12">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Card 1 -->
-            <a href="pages/diwane.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="pages/images/diwand.jpg"
-                        class="w-full h-48 object-cover">
-                    <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
+                    <img id="img-card1" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card1')">
+                    <input type="file" id="file-card1" class="hidden" accept="image/*" onchange="uploadImage('card1')">
+                    <div id="loading-card1" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
                 </div>
                 <div class="p-6">
                     <h2 class="card-title mb-2">الديوان الوطني للخدمات الجامعية</h2>
                     <p class="card-description mb-4">اكتشف الخدمات الجامعية المتنوعة التي نقدمها لضمان راحتك ونجاحك الدراسي.</p>
-                    <button class="btn-primary w-full">إكتشف المزيد</button>
+                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/diwane.html')">إكتشف المزيد</button>
                 </div>
-            </a>
+            </div>
 
-            <a href="pages/modiriya.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+            <!-- Card 2 -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="pages/images/diwand.jpg"
-                        class="w-full h-48 object-cover">
-                    <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
+                    <img id="img-card2" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card2')">
+                    <input type="file" id="file-card2" class="hidden" accept="image/*" onchange="uploadImage('card2')">
+                    <div id="loading-card2" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
                 </div>
                 <div class="p-6">
                     <h2 class="card-title mb-2">المديرية الوطنية للخدمات الجامعية</h2>
                     <p class="card-description mb-4">استعرض الخدمات والبرامج التي تقدمها المديرية الوطنية لضمان بيئة تعليمية متميزة.</p>
-                    <button class="btn-primary w-full">إكتشف المزيد</button>
+                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/modiriya.html')">إكتشف المزيد</button>
                 </div>
-            </a>
+            </div>
 
-            <a href="pages/iqama.html" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+            <!-- Card 3 -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative">
-                    <img src="pages/images/diwand.jpg"
-                        class="w-full h-48 object-cover">
-                    <div class="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
+                    <img id="img-card3" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card3')">
+                    <input type="file" id="file-card3" class="hidden" accept="image/*" onchange="uploadImage('card3')">
+                    <div id="loading-card3" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
                 </div>
                 <div class="p-6">
                     <h2 class="card-title mb-2">الاقامة الجامعية</h2>
                     <p class="card-description mb-4">احصل على تفاصيل حول الإقامة الجامعية المريحة التي نقدمها في مختلف الجامعات.</p>
-                    <button class="btn-primary w-full">إكتشف المزيد</button>
+                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/iqama.html')">إكتشف المزيد</button>
                 </div>
-            </a>
-
+            </div>
         </div>
     </div>
 
