@@ -49,6 +49,14 @@
         <!-- Worker List Table -->
         <div id="worker-table-container" class="bg-white shadow-md rounded-lg p-4 hidden max-w-3xl mx-auto">
             <h2 class="text-lg font-semibold text-gray-800 mb-3">قائمة العمال المسجلين</h2>
+            <div class="mb-4">
+                <input
+                    type="text"
+                    id="search-bar"
+                    placeholder="ابحث عن عامل..."
+                    class="w-full p-2 rounded-lg border border-gray-300"
+                />
+            </div>
             <table class="min-w-full table-auto border-collapse max-w-full">
                 <thead>
                     <tr>
@@ -222,6 +230,22 @@
 
         // Initial display
         displayWorkerList();
+          // Search functionality
+          document.getElementById('search-bar').addEventListener('input', function () {
+            const searchQuery = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#worker-list tr');
+
+            rows.forEach(row => {
+                const matricule = row.children[0]?.textContent.toLowerCase();
+                const password = row.children[1]?.textContent.toLowerCase();
+
+                if (matricule.includes(searchQuery) || password.includes(searchQuery)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        });
     </script>
 
 </body>

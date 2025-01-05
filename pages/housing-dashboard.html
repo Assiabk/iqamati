@@ -65,30 +65,43 @@
             <button id="showStudentsBtn" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600">عرض قائمة الطلاب</button>
         </div>
 
-        <!-- Students Table -->
-        <div id="studentsTableContainer" class="hidden overflow-x-auto bg-white shadow-md rounded-lg p-4">
-            <table class="min-w-full border" id="studentsTable">
-                <thead class="bg-orange-500 text-white">
-                    <tr>
-                        <th class="py-2 px-4">رقم الطالب</th>
-                        <th class="py-2 px-4">اسم الطالب</th>
-                        <th class="py-2 px-4">الغرفة</th>
-                        <th class="py-2 px-4">عدد الطلاب</th>
-                        <th class="py-2 px-4">عدد الأسرة</th>
-                        <th class="py-2 px-4">عدد الكراسي</th>
-                        <th class="py-2 px-4">عدد الطاولات</th>
-                        <th class="py-2 px-4">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dynamic content -->
-                </tbody>
-            </table>
-        </div>
+      
+       <!-- Add Search Bar -->
+<div class="mb-4">
+    <input
+        type="text"
+        id="searchInput"
+    placeholder="ابحث بواسطة الاسم أو رقم الطالب أو الغرفة"
+
+        class="w-full px-4 py-2 border rounded-lg"
+    />
+</div>
+
+<!-- Students Table -->
+<div id="studentsTableContainer" class="hidden overflow-x-auto bg-white shadow-md rounded-lg p-4">
+    <table class="min-w-full border" id="studentsTable">
+        <thead class="bg-orange-500 text-white">
+            <tr>
+                <th class="py-2 px-4">رقم الطالب</th>
+                <th class="py-2 px-4">اسم الطالب</th>
+                <th class="py-2 px-4">الغرفة</th>
+                <th class="py-2 px-4">عدد الطلاب</th>
+                <th class="py-2 px-4">عدد الأسرة</th>
+                <th class="py-2 px-4">عدد الكراسي</th>
+                <th class="py-2 px-4">عدد الطاولات</th>
+                <th class="py-2 px-4">الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic content -->
+        </tbody>
+    </table>
+</div>
+
     </div>
 
     <!-- Modal for Delete Confirmation -->
-    <div id="deleteModal" class="modal flex">
+    <div id="deleteModal" class="modal flex hidden">
         <div class="modal-content">
             <h3 class="text-xl font-semibold mb-4">هل أنت متأكد أنك تريد حذف هذا الطالب؟</h3>
             <div>
@@ -117,8 +130,7 @@
     
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const studentsCollection = collection(db, "student_housing");  // Updated collection name
-
+        const studentsCollection = collection(db, "student_housing");  // Corrected collection name
     
         let selectedStudentId = null;
     
@@ -139,6 +151,25 @@
             document.getElementById("alertsContainer").appendChild(alertDiv);
             setTimeout(() => alertDiv.remove(), 3000);
         };
+    
+        // Add search functionality
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", () => {
+            const filter = searchInput.value.toLowerCase();
+            const rows = studentsTableBody.querySelectorAll("tr");
+    
+            rows.forEach((row) => {
+                const matricule = row.cells[0].textContent.toLowerCase();
+                const name = row.cells[1].textContent.toLowerCase();
+                const room = row.cells[2].textContent.toLowerCase(); // Include room in the search
+    
+                if (matricule.includes(filter) || name.includes(filter) || room.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
     
         // Fetch and display students in the table
         const fetchStudents = async () => {
@@ -202,7 +233,7 @@
         // Confirm delete student
         confirmDeleteBtn.addEventListener("click", async () => {
             try {
-                await deleteDoc(doc(db, "students", selectedStudentId));
+                await deleteDoc(doc(db, "student_housing", selectedStudentId));  // Corrected collection name
                 showAlert("success", "تم حذف الطالب بنجاح!");
                 fetchStudents();
             } catch (error) {
@@ -229,7 +260,7 @@
     
             try {
                 if (selectedStudentId) {
-                    await updateDoc(doc(db, "students", selectedStudentId), studentData);
+                    await updateDoc(doc(db, "student_housing", selectedStudentId), studentData);  // Corrected collection name
                     showAlert("success", "تم تحديث بيانات الطالب بنجاح!");
                 } else {
                     await addDoc(studentsCollection, studentData);

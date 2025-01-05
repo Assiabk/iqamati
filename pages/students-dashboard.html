@@ -57,6 +57,17 @@
         <!-- Student List -->
         <div id="student-list-container" class="bg-white shadow-lg rounded-lg p-6 mt-4 hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">قائمة الطلاب المسجلين</h2>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input
+                    type="text"
+                    id="search-bar"
+                    placeholder="ابحث عن طالب..."
+                    class="w-full p-2 rounded-lg border border-gray-300"
+                />
+            </div>
+
             <table class="w-full table-auto border-collapse border border-gray-300">
                 <thead>
                     <tr class="bg-gray-100">
@@ -102,17 +113,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Global variable to hold the current student ID being edited
         let currentStudentId = null;
 
-        // Handle the form submission to add or edit a student
         document.getElementById('student-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const matricule = document.getElementById('student-matricule').value;
             const password = document.getElementById('student-password').value;
 
-            // Check if the password is at least 8 characters long
             if (password.length < 8) {
                 document.getElementById('password-error').classList.remove('hidden');
                 return;
@@ -131,19 +139,16 @@
             try {
                 if (currentStudentId) {
                     await updateDoc(doc(db, "students", currentStudentId), {
-                        matricule: matricule,
-                        password: password
+                        matricule,
+                        password
                     });
                     showSuccessAlert('تم تحديث بيانات الطالب بنجاح');
                     currentStudentId = null;
                 } else {
-                    await addDoc(collection(db, "students"), {
-                        matricule: matricule,
-                        password: password
-                    });
+                    await addDoc(collection(db, "students"), { matricule, password });
                     showSuccessAlert('تم إضافة الطالب بنجاح');
                 }
-            } catch (error) {
+            } catch {
                 showErrorAlert('خطأ في معالجة الطالب');
             }
 
@@ -152,7 +157,6 @@
             displayStudentList();
         });
 
-        // Function to display the list of students
         async function displayStudentList() {
             const studentList = document.getElementById('student-list');
             studentList.innerHTML = '';
@@ -172,71 +176,77 @@
                     `;
                     studentList.appendChild(tr);
                 });
-            } catch (error) {
+            } catch {
                 showErrorAlert('خطأ في تحميل قائمة الطلاب');
             }
         }
 
-        // Function to edit a student
         window.editStudent = function (id, matricule, password) {
             currentStudentId = id;
             document.getElementById('student-matricule').value = matricule;
             document.getElementById('student-password').value = password;
         }
 
-        // Function to delete a student
         window.deleteStudent = function (id) {
             const modal = document.getElementById('confirmation-modal');
             const confirmBtn = document.getElementById('confirm-delete-btn');
             const cancelBtn = document.getElementById('cancel-delete-btn');
 
-            modal.classList.remove('hidden'); // Show the modal
+            modal.classList.remove('hidden');
 
-            // Handle confirm button click
             confirmBtn.onclick = async function () {
                 try {
                     await deleteDoc(doc(db, "students", id));
                     showSuccessAlert('تم حذف الطالب بنجاح');
-                    modal.classList.add('hidden'); // Hide the modal
+                    modal.classList.add('hidden');
                     displayStudentList();
-                } catch (error) {
+                } catch {
                     showErrorAlert('خطأ في حذف الطالب');
                     modal.classList.add('hidden');
                 }
             };
 
-            // Handle cancel button click
             cancelBtn.onclick = function () {
-                modal.classList.add('hidden'); // Hide the modal
+                modal.classList.add('hidden');
             };
         }
 
-        // Alert functions
-        function showSuccessAlert(message) {
-            const successAlert = document.getElementById('success-alert');
-            successAlert.textContent = message;
-            successAlert.classList.remove('hidden');
-            setTimeout(() => successAlert.classList.add('hidden'), 3000);
-        }
-
-        function showErrorAlert(message) {
-            const errorAlert = document.getElementById('error-alert');
-            errorAlert.textContent = message;
-            errorAlert.classList.remove('hidden');
-            setTimeout(() => errorAlert.classList.add('hidden'), 3000);
-        }
-
-        // Toggle student list visibility
         document.getElementById('show-student-list-btn').addEventListener('click', function () {
             const studentListContainer = document.getElementById('student-list-container');
             studentListContainer.classList.toggle('hidden');
-            if (!studentListContainer.classList.contains('hidden')) {
-                displayStudentList(); // Load student list if showing
-            }
+            displayStudentList();
         });
 
-        // Initial display
-        displayStudentList();
+        function showSuccessAlert(message) {
+            const alert = document.getElementById('success-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+
+        function showErrorAlert(message) {
+            const alert = document.getElementById('error-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+
+        // Search functionality
+        document.getElementById('search-bar').addEventListener('input', function () {
+            const searchQuery = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#student-list tr');
+
+            rows.forEach(row => {
+                const matricule = row.children[0]?.textContent.toLowerCase();
+                const password = row.children[1]?.textContent.toLowerCase();
+
+                if (matricule.includes(searchQuery) || password.includes(searchQuery)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        });
     </script>
 
 </body>
