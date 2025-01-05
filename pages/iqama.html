@@ -6,12 +6,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الاقامة الجامعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+           // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+        authDomain: "iqamatisite.firebaseapp.com",
+        projectId: "iqamatisite",
+        storageBucket: "iqamatisite.appspot.com",
+        messagingSenderId: "240286199373",
+        appId: "1:240286199373:web:c1c9b01529edf378f33604",
+    };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Firestore collection reference
+        const iqamasCollection = collection(db, 'iqamas');
+
+        // Show alert function
+        function showAlert(message, type) {
+            const alertMessage = document.getElementById("alertMessage");
+            alertMessage.classList.remove("hidden", "bg-green-500", "bg-red-500");
+            alertMessage.classList.add(type === "success" ? "bg-green-500" : "bg-red-500");
+            alertMessage.innerHTML = message;
+        }
+
+        // Login form handler
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginForm = document.getElementById("loginForm");
+            const loginSection = document.getElementById("loginSection");
+            const mainContent = document.getElementById("mainContent");
+
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value.trim();
+
+                try {
+                    const iqamaQuery = query(iqamasCollection, where("email", "==", email), where("password", "==", password));
+                    const querySnapshot = await getDocs(iqamaQuery);
+
+                    if (!querySnapshot.empty) {
+                        const iqamaData = querySnapshot.docs[0].data();
+                        const currentIqamaId = querySnapshot.docs[0].id;
+
+                        showAlert("تم تسجيل الدخول بنجاح", "success");
+                        loginSection.classList.add("hidden");
+                        mainContent.classList.remove("hidden");
+
+                        // Fetch students or other necessary actions here
+                        fetchStudents();
+                    } else {
+                        showAlert("فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.", "error");
+                    }
+                } catch (error) {
+                    console.error("Error during login:", error);
+                    showAlert("حدث خطأ أثناء تسجيل الدخول", "error");
+                }
+            });
+        });
+
+        // Function to fetch students (this is just an example, implement your logic)
+        function fetchStudents() {
+            // Your logic for fetching student data
+        }
+    </script>
 </head>
 
 <body class="bg-gray-100 font-sans">
 
     <!-- Main Container -->
-    <div class="container mx-auto p-4 space-y-8">
+    <div class="text-center mb-8 fade-in">
+        <h1 class="text-4xl font-bold text-gray-800">إدارة الإقامات الجامعية</h1>
+        <p class="text-gray-600 text-xl mt-2">تسجيل الدخول لإدارة الطلاب والغرف</p>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginSection" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg slide-up">
+        <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
+        
+        <!-- Alert Messages -->
+        <div id="alertMessage" class="hidden p-4 rounded-lg mb-4 text-center transition duration-300"></div>
+        
+        <form id="loginForm" class="space-y-6">
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل البريد الإلكتروني" required>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="ادخل كلمة المرور" required>
+            </div>
+
+            <!-- Login Button -->
+            <div class="text-center">
+                <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition duration-300 w-full transform hover:scale-105">تسجيل الدخول</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Main Content Section (hidden initially) -->
+    <div id="mainContent" class="container mx-auto p-4 space-y-8 hidden">
         <div class="text-center">
             <h1 class="text-2xl font-bold text-gray-800">الاقامة الجامعية</h1>
         </div>
@@ -22,7 +127,7 @@
             <!-- Administration Container -->
             <div class="bg-white shadow-md rounded-lg p-6 flex-1 text-center hover:scale-105 transition-transform duration-300">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">الإدارة</h2>
-                <p class="text-gray-600 mb-4">يمكن للإدارة إدارة الإقامات الجامعية والطلاب من خلال هذا القسم.</p>
+                <p class="text-gray-600 mb-4">يمكنك هنا تسيير الشؤون الإدارية للإقامة الجامعية</p>
                 <a href="admin-dashboard.html">
                     <button class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">الدخول</button>
                 </a>
@@ -31,7 +136,7 @@
             <!-- Housing Container -->
             <div class="bg-white shadow-md rounded-lg p-6 flex-1 text-center hover:scale-105 transition-transform duration-300">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">الإيواء</h2>
-                <p class="text-gray-600 mb-4">هنا يمكن للطلاب الوصول إلى جميع المعلومات المتعلقة بالإيواء الجامعي.</p>
+                <p class="text-gray-600 mb-4">يمكنك هنا تسيير شؤون مصلحة الإيواء للإقامة الجامعية</p>
                 <a href="housing-dashboard.html">
                     <button class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">الدخول</button>
                 </a>

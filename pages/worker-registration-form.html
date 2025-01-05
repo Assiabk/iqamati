@@ -11,90 +11,217 @@
 <body class="bg-gray-100 font-sans">
 
     <!-- Main Container -->
-    <div class="container mx-auto p-4 space-y-8">
+    <div class="container mx-auto p-4 space-y-6">
         <div class="text-center">
-            <h1 class="text-2xl font-bold text-gray-800">تسجيل العمال</h1>
+            <h1 class="text-xl font-bold text-gray-800">تسجيل العمال</h1>
+        </div>
+
+        <!-- Alert Modals -->
+        <div id="success-alert" class="hidden bg-green-500 text-white text-center py-2 px-4 rounded-lg mb-4">
+            <p>تمت العملية بنجاح!</p>
+        </div>
+        <div id="error-alert" class="hidden bg-red-500 text-white text-center py-2 px-4 rounded-lg mb-4">
+            <p>حدث خطأ أثناء العملية!</p>
         </div>
 
         <!-- Worker Registration Form -->
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">إضافة عامل جديد</h2>
-            <form id="worker-form" class="space-y-4">
+        <div class="bg-white shadow-md rounded-lg p-4 max-w-sm mx-auto">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">إضافة عامل جديد</h2>
+            <form id="worker-form" class="space-y-3">
                 <div>
-                    <label for="worker-name" class="block text-gray-600">اسم العامل</label>
-                    <input type="text" id="worker-name" name="worker-name" required class="w-full p-2 rounded-lg border border-gray-300">
+                    <label for="worker-name" class="block text-gray-600 text-sm">اسم العامل</label>
+                    <input type="text" id="worker-name" name="worker-name" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
                 </div>
                 <div>
-                    <label for="worker-password" class="block text-gray-600">كلمة المرور</label>
-                    <input type="password" id="worker-password" name="worker-password" required class="w-full p-2 rounded-lg border border-gray-300">
-                    <p id="password-error" class="text-red-500 text-sm hidden">يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.</p>
+                    <label for="worker-password" class="block text-gray-600 text-sm">كلمة المرور</label>
+                    <input type="password" id="worker-password" name="worker-password" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
+                    <p id="password-error" class="text-red-500 text-xs hidden">يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.</p>
                 </div>
-                <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">تسجيل العامل</button>
+                <button type="submit" class="bg-orange-500 text-white px-4 py-1 rounded-lg hover:bg-orange-600 transition duration-300 w-full text-sm">تسجيل العامل</button>
             </form>
         </div>
 
-        <!-- Worker List -->
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">قائمة العمال المسجلين</h2>
-            <ul id="worker-list" class="space-y-4">
-                <!-- Worker List Items will be dynamically added here -->
-            </ul>
+        <!-- Centered Toggle Button for Worker List -->
+        <div class="flex justify-center">
+            <button id="toggle-table-btn" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 mb-4 text-sm">إظهار/إخفاء قائمة العمال</button>
         </div>
 
+        <!-- Worker List Table -->
+        <div id="worker-table-container" class="bg-white shadow-md rounded-lg p-4 hidden max-w-3xl mx-auto">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">قائمة العمال المسجلين</h2>
+            <table class="min-w-full table-auto border-collapse max-w-full">
+                <thead>
+                    <tr>
+                        <th class="border px-2 py-1 text-gray-600 text-sm">اسم العامل</th>
+                        <th class="border px-2 py-1 text-gray-600 text-sm">كلمة المرور</th>
+                        <th class="border px-2 py-1 text-gray-600 text-sm">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="worker-list">
+                    <!-- Worker List Items will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <script>
-        // Array to store worker data
-        let workers = [];
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-4 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 class="text-sm font-semibold text-gray-800 mb-3">هل أنت متأكد أنك تريد حذف هذا العامل؟</h2>
+            <div class="flex justify-between">
+                <button id="cancel-delete-btn" class="bg-gray-300 text-black px-3 py-1 rounded-lg hover:bg-gray-400 text-sm">إلغاء</button>
+                <button id="confirm-delete-btn" class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm">حذف</button>
+            </div>
+        </div>
+    </div>
 
-        // Handle the form submission
-        document.getElementById('worker-form').addEventListener('submit', function (e) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.appspot.com",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentWorkerId = null;
+
+        // Handle the form submission to add or edit a worker
+        document.getElementById('worker-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Get the form data
             const name = document.getElementById('worker-name').value;
             const password = document.getElementById('worker-password').value;
 
-            // Check if the password is at least 8 characters long
+            // Validate the password
             if (password.length < 8) {
                 document.getElementById('password-error').classList.remove('hidden');
-                return; // Stop the form from being submitted if password is too short
+                return; 
             } else {
                 document.getElementById('password-error').classList.add('hidden');
             }
 
-            // Add the new worker to the workers array
-            workers.push({ name, password });
+            // If editing an existing worker
+            if (currentWorkerId) {
+                try {
+                    await updateDoc(doc(db, "workers", currentWorkerId), {
+                        name: name,
+                        password: password
+                    });
+                    showSuccessAlert('تم تحديث بيانات العامل بنجاح');
+                    currentWorkerId = null; // Reset the worker id after update
+                } catch (error) {
+                    showErrorAlert('خطأ في تحديث بيانات العامل');
+                }
+            } else {
+                // If adding a new worker
+                try {
+                    await addDoc(collection(db, "workers"), {
+                        name: name,
+                        password: password
+                    });
+                    showSuccessAlert('تم إضافة العامل بنجاح');
+                } catch (error) {
+                    showErrorAlert('خطأ في إضافة العامل');
+                }
+            }
 
-            // Clear the form fields
+            // Clear the form and refresh the worker list
             document.getElementById('worker-name').value = '';
             document.getElementById('worker-password').value = '';
-
-            // Update the worker list display
             displayWorkerList();
         });
 
-        // Function to display the list of workers
-        function displayWorkerList() {
+        // Function to display the list of workers in a table
+        async function displayWorkerList() {
             const workerList = document.getElementById('worker-list');
-            workerList.innerHTML = ''; // Clear the list before updating
+            workerList.innerHTML = '';
 
-            workers.forEach(worker => {
-                const li = document.createElement('li');
-                li.classList.add('p-4', 'bg-gray-50', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200', 'hover:bg-gray-100');
-                li.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <strong class="text-gray-700">اسم العامل:</strong> <span class="text-gray-600">${worker.name}</span>
-                        </div>
-                        <div>
-                            <strong class="text-gray-700">كلمة المرور:</strong> <span class="text-gray-600">${worker.password}</span>
-                        </div>
-                    </div>
-                `;
-                workerList.appendChild(li);
-            });
+            try {
+                const snapshot = await getDocs(collection(db, "workers"));
+                snapshot.forEach(docSnapshot => {
+                    const worker = docSnapshot.data();
+                    const tr = document.createElement('tr');
+                    tr.classList.add('border-b');
+                    tr.innerHTML = `
+                        <td class="border px-2 py-1 text-sm">${worker.name}</td>
+                        <td class="border px-2 py-1 text-sm">${worker.password}</td>
+                        <td class="border px-2 py-1 text-sm">
+                            <button class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 text-xs" onclick="editWorker('${docSnapshot.id}', '${worker.name}', '${worker.password}')">تعديل</button>
+                            <button class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 text-xs" onclick="deleteWorker('${docSnapshot.id}')">حذف</button>
+                        </td>
+                    `;
+                    workerList.appendChild(tr);
+                });
+            } catch (error) {
+                showErrorAlert('خطأ في تحميل قائمة العمال');
+            }
         }
+
+        // Function to edit a worker
+        window.editWorker = function (id, name, password) {
+            currentWorkerId = id;
+            document.getElementById('worker-name').value = name;
+            document.getElementById('worker-password').value = password;
+        }
+
+        // Function to delete a worker
+        window.deleteWorker = function (id) {
+            const modal = document.getElementById('confirmation-modal');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            const cancelBtn = document.getElementById('cancel-delete-btn');
+
+            modal.classList.remove('hidden'); 
+
+            confirmBtn.onclick = async function () {
+                try {
+                    await deleteDoc(doc(db, "workers", id));
+                    showSuccessAlert('تم حذف العامل بنجاح');
+                    modal.classList.add('hidden'); 
+                    displayWorkerList();
+                } catch (error) {
+                    showErrorAlert('خطأ في حذف العامل');
+                    modal.classList.add('hidden');
+                }
+            };
+
+            cancelBtn.onclick = function () {
+                modal.classList.add('hidden');
+            };
+        }
+
+        // Alert functions
+        function showSuccessAlert(message) {
+            const successAlert = document.getElementById('success-alert');
+            successAlert.textContent = message;
+            successAlert.classList.remove('hidden');
+            setTimeout(() => successAlert.classList.add('hidden'), 3000);
+        }
+
+        function showErrorAlert(message) {
+            const errorAlert = document.getElementById('error-alert');
+            errorAlert.textContent = message;
+            errorAlert.classList.remove('hidden');
+            setTimeout(() => errorAlert.classList.add('hidden'), 3000);
+        }
+
+        // Toggle table visibility
+        document.getElementById('toggle-table-btn').addEventListener('click', function () {
+            const tableContainer = document.getElementById('worker-table-container');
+            tableContainer.classList.toggle('hidden');
+        });
+
+        // Initial display
+        displayWorkerList();
     </script>
 
 </body>
