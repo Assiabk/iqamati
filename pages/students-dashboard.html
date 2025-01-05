@@ -68,20 +68,22 @@
                 />
             </div>
 
-            <table class="w-full table-auto border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 border">رقم الطالب</th>
-                        <th class="px-4 py-2 border">كلمة المرور</th>
-                        <th class="px-4 py-2 border">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="student-list" class="text-center">
-                    <!-- Student items will be dynamically added -->
-                </tbody>
-            </table>
-        </div>
+           <!-- Responsive Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full table-auto border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 border">رقم الطالب</th>
+                    <th class="px-4 py-2 border">كلمة المرور</th>
+                    <th class="px-4 py-2 border">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="student-list" class="text-center">
+                <!-- Student items will be dynamically added -->
+            </tbody>
+        </table>
     </div>
+</div>
 
     <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center hidden">
