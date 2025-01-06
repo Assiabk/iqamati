@@ -43,7 +43,14 @@
 
         <!-- Centered Toggle Button for Worker List -->
         <div class="flex justify-center">
-            <button id="toggle-table-btn" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 mb-4 text-sm">إظهار/إخفاء قائمة العمال</button>
+            <button id="toggle-worker-list-btn" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 mb-4 text-sm">إظهار/إخفاء قائمة العمال</button>
+        </div>
+
+        <!-- Sort Button -->
+        <div class="flex justify-center mb-4">
+            <button id="sort-worker-list-btn" class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 text-sm">
+                ترتيب العمال أبجديًا
+            </button>
         </div>
 
         <!-- Worker List Table -->
@@ -57,18 +64,20 @@
                     class="w-full p-2 rounded-lg border border-gray-300"
                 />
             </div>
-            <table class="min-w-full table-auto border-collapse max-w-full">
-                <thead>
-                    <tr>
-                        <th class="border px-2 py-1 text-gray-600 text-sm">اسم العامل</th>
-                        <th class="border px-2 py-1 text-gray-600 text-sm">كلمة المرور</th>
-                        <th class="border px-2 py-1 text-gray-600 text-sm">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="worker-list">
-                    <!-- Worker List Items will be dynamically added here -->
-                </tbody>
-            </table>
+            <div class="overflow-x-auto w-full">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="border px-2 py-1 text-gray-600 text-sm">اسم العامل</th>
+                            <th class="border px-2 py-1 text-gray-600 text-sm">كلمة المرور</th>
+                            <th class="border px-2 py-1 text-gray-600 text-sm">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="worker-list">
+                        <!-- Worker List Items will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -86,8 +95,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        // Firebase Configuration
+    
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -96,150 +104,192 @@
             messagingSenderId: "240286199373",
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
-
-        // Initialize Firebase
+    
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
+    
         let currentWorkerId = null;
-
-        // Handle the form submission to add or edit a worker
+        let isAscending = true; // To keep track of sort order (ascending/descending)
+    
+        // Handle form submission for adding or updating worker
         document.getElementById('worker-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-
+    
             const name = document.getElementById('worker-name').value;
             const password = document.getElementById('worker-password').value;
-
-            // Validate the password
+    
             if (password.length < 8) {
                 document.getElementById('password-error').classList.remove('hidden');
-                return; 
+                return;
             } else {
                 document.getElementById('password-error').classList.add('hidden');
             }
-
-            // If editing an existing worker
-            if (currentWorkerId) {
-                try {
+    
+            // Retrieve iqamaId from localStorage
+            const iqamaId = localStorage.getItem('iqamaId');
+    
+            if (!iqamaId) {
+                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                return;
+            }
+    
+            // Check if the worker already exists
+            const q = query(collection(db, "workers"), where("name", "==", name));
+            const querySnapshot = await getDocs(q);
+    
+            if (!querySnapshot.empty && currentWorkerId === null) {
+                showErrorAlert('اسم العامل موجود بالفعل');
+                return;
+            }
+    
+            try {
+                if (currentWorkerId) {
+                    // Update existing worker
                     await updateDoc(doc(db, "workers", currentWorkerId), {
-                        name: name,
-                        password: password
+                        name,
+                        password,
+                        iqamaId
                     });
                     showSuccessAlert('تم تحديث بيانات العامل بنجاح');
-                    currentWorkerId = null; // Reset the worker id after update
-                } catch (error) {
-                    showErrorAlert('خطأ في تحديث بيانات العامل');
-                }
-            } else {
-                // If adding a new worker
-                try {
+                    currentWorkerId = null;
+                } else {
+                    // Add new worker
                     await addDoc(collection(db, "workers"), {
-                        name: name,
-                        password: password
+                        name,
+                        password,
+                        iqamaId
                     });
                     showSuccessAlert('تم إضافة العامل بنجاح');
-                } catch (error) {
-                    showErrorAlert('خطأ في إضافة العامل');
                 }
+            } catch {
+                showErrorAlert('خطأ في معالجة العامل');
             }
-
-            // Clear the form and refresh the worker list
+    
+            // Clear form fields
             document.getElementById('worker-name').value = '';
             document.getElementById('worker-password').value = '';
             displayWorkerList();
         });
-
-        // Function to display the list of workers in a table
+    
+        function showSuccessAlert(message) {
+            const alert = document.getElementById('success-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+    
+        function showErrorAlert(message) {
+            const alert = document.getElementById('error-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+    
+        // Function to display worker list and sort alphabetically
         async function displayWorkerList() {
             const workerList = document.getElementById('worker-list');
             workerList.innerHTML = '';
-
+    
+            // Retrieve iqamaId from localStorage
+            const iqamaId = localStorage.getItem('iqamaId');
+    
+            if (!iqamaId) {
+                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                return;
+            }
+    
             try {
                 const snapshot = await getDocs(collection(db, "workers"));
+                let workers = [];
+    
                 snapshot.forEach(docSnapshot => {
                     const worker = docSnapshot.data();
+                    
+                    // Filter workers based on iqamaId
+                    if (worker.iqamaId === iqamaId) {
+                        workers.push({
+                            id: docSnapshot.id,
+                            name: worker.name,
+                            password: worker.password
+                        });
+                    }
+                });
+    
+                // Sort workers alphabetically by name
+                workers.sort((a, b) => {
+                    if (isAscending) {
+                        return a.name.localeCompare(b.name);
+                    } else {
+                        return b.name.localeCompare(a.name);
+                    }
+                });
+    
+                // Append sorted workers to the table
+                workers.forEach(worker => {
                     const tr = document.createElement('tr');
-                    tr.classList.add('border-b');
                     tr.innerHTML = `
-                        <td class="border px-2 py-1 text-sm">${worker.name}</td>
-                        <td class="border px-2 py-1 text-sm">${worker.password}</td>
-                        <td class="border px-2 py-1 text-sm">
-                            <button class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 text-xs" onclick="editWorker('${docSnapshot.id}', '${worker.name}', '${worker.password}')">تعديل</button>
-                            <button class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 text-xs" onclick="deleteWorker('${docSnapshot.id}')">حذف</button>
+                        <td class="px-4 py-2 border-b">${worker.name}</td>
+                        <td class="px-4 py-2 border-b">${worker.password}</td>
+                        <td class="px-4 py-2 border-b">
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}')">تعديل</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteWorker('${worker.id}')">حذف</button>
                         </td>
                     `;
                     workerList.appendChild(tr);
                 });
-            } catch (error) {
+            } catch {
                 showErrorAlert('خطأ في تحميل قائمة العمال');
             }
         }
-
-        // Function to edit a worker
-        window.editWorker = function (id, name, password) {
-            currentWorkerId = id;
-            document.getElementById('worker-name').value = name;
-            document.getElementById('worker-password').value = password;
-        }
-
-        // Function to delete a worker
+    
+        // Toggle sorting order when the sort button is clicked
+        document.getElementById('sort-worker-list-btn').addEventListener('click', function () {
+            isAscending = !isAscending; // Toggle sort order
+            displayWorkerList(); // Refresh the list with new sort order
+        });
+    
+        // Delete worker function
         window.deleteWorker = function (id) {
             const modal = document.getElementById('confirmation-modal');
             const confirmBtn = document.getElementById('confirm-delete-btn');
             const cancelBtn = document.getElementById('cancel-delete-btn');
-
-            modal.classList.remove('hidden'); 
-
+    
+            modal.classList.remove('hidden');
+    
             confirmBtn.onclick = async function () {
                 try {
                     await deleteDoc(doc(db, "workers", id));
                     showSuccessAlert('تم حذف العامل بنجاح');
-                    modal.classList.add('hidden'); 
+                    modal.classList.add('hidden');
                     displayWorkerList();
-                } catch (error) {
+                } catch {
                     showErrorAlert('خطأ في حذف العامل');
                     modal.classList.add('hidden');
                 }
             };
-
+    
             cancelBtn.onclick = function () {
                 modal.classList.add('hidden');
             };
         }
-
-        // Alert functions
-        function showSuccessAlert(message) {
-            const successAlert = document.getElementById('success-alert');
-            successAlert.textContent = message;
-            successAlert.classList.remove('hidden');
-            setTimeout(() => successAlert.classList.add('hidden'), 3000);
-        }
-
-        function showErrorAlert(message) {
-            const errorAlert = document.getElementById('error-alert');
-            errorAlert.textContent = message;
-            errorAlert.classList.remove('hidden');
-            setTimeout(() => errorAlert.classList.add('hidden'), 3000);
-        }
-
-        // Toggle table visibility
-        document.getElementById('toggle-table-btn').addEventListener('click', function () {
-            const tableContainer = document.getElementById('worker-table-container');
-            tableContainer.classList.toggle('hidden');
+    
+        // Toggle visibility of worker list
+        document.getElementById('toggle-worker-list-btn').addEventListener('click', function () {
+            const workerListContainer = document.getElementById('worker-table-container');
+            workerListContainer.classList.toggle('hidden');
+            displayWorkerList();  // Ensure this is called to refresh the list when shown
         });
-
-        // Initial display
-        displayWorkerList();
-          // Search functionality
-          document.getElementById('search-bar').addEventListener('input', function () {
+    
+        // Search functionality for workers
+        document.getElementById('search-bar').addEventListener('input', function () {
             const searchQuery = this.value.toLowerCase();
             const rows = document.querySelectorAll('#worker-list tr');
-
+    
             rows.forEach(row => {
-                const matricule = row.children[0]?.textContent.toLowerCase();
+                const name = row.children[0]?.textContent.toLowerCase();
                 const password = row.children[1]?.textContent.toLowerCase();
-
-                if (matricule.includes(searchQuery) || password.includes(searchQuery)) {
+    
+                if (name.includes(searchQuery) || password.includes(searchQuery)) {
                     row.classList.remove('hidden');
                 } else {
                     row.classList.add('hidden');
@@ -247,7 +297,7 @@
             });
         });
     </script>
-
+    
 </body>
 
 </html>

@@ -54,6 +54,14 @@
             </button>
         </div>
 
+        <!-- Sort Button -->
+        <div class="text-center">
+            <button id="sort-student-list-btn"
+                class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition duration-300 mt-4">
+                ترتيب الطلاب أبجديًا
+            </button>
+        </div>
+
         <!-- Student List -->
         <div id="student-list-container" class="bg-white shadow-lg rounded-lg p-6 mt-4 hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">قائمة الطلاب المسجلين</h2>
@@ -69,21 +77,21 @@
             </div>
 
            <!-- Responsive Table -->
-    <div class="overflow-x-auto">
-        <table class="w-full table-auto border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="px-4 py-2 border">رقم الطالب</th>
-                    <th class="px-4 py-2 border">كلمة المرور</th>
-                    <th class="px-4 py-2 border">الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody id="student-list" class="text-center">
-                <!-- Student items will be dynamically added -->
-            </tbody>
-        </table>
-    </div>
-</div>
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-2 border">رقم الطالب</th>
+                            <th class="px-4 py-2 border">كلمة المرور</th>
+                            <th class="px-4 py-2 border">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list" class="text-center">
+                        <!-- Student items will be dynamically added -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
     <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center hidden">
@@ -101,7 +109,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -111,12 +118,12 @@
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let currentStudentId = null;
 
+        // Handle form submission for adding or updating students
         document.getElementById('student-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -130,6 +137,14 @@
                 document.getElementById('password-error').classList.add('hidden');
             }
 
+            // Retrieve iqamaId from localStorage
+            const iqamaId = localStorage.getItem('iqamaId');
+
+            if (!iqamaId) {
+                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                return;
+            }
+
             const q = query(collection(db, "students"), where("matricule", "==", matricule));
             const querySnapshot = await getDocs(q);
 
@@ -140,40 +155,88 @@
 
             try {
                 if (currentStudentId) {
+                    // Update existing student
                     await updateDoc(doc(db, "students", currentStudentId), {
                         matricule,
-                        password
+                        password,
+                        iqamaId // Add iqamaId to the student document
                     });
                     showSuccessAlert('تم تحديث بيانات الطالب بنجاح');
                     currentStudentId = null;
                 } else {
-                    await addDoc(collection(db, "students"), { matricule, password });
+                    // Add new student
+                    await addDoc(collection(db, "students"), {
+                        matricule,
+                        password,
+                        iqamaId // Add iqamaId to the new student document
+                    });
                     showSuccessAlert('تم إضافة الطالب بنجاح');
                 }
             } catch {
                 showErrorAlert('خطأ في معالجة الطالب');
             }
 
+            // Clear form fields
             document.getElementById('student-matricule').value = '';
             document.getElementById('student-password').value = '';
             displayStudentList();
         });
 
+        function showSuccessAlert(message) {
+            const alert = document.getElementById('success-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+
+        function showErrorAlert(message) {
+            const alert = document.getElementById('error-alert');
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 3000);
+        }
+
         async function displayStudentList() {
             const studentList = document.getElementById('student-list');
             studentList.innerHTML = '';
 
+            // Retrieve iqamaId from localStorage
+            const iqamaId = localStorage.getItem('iqamaId');
+            
+            if (!iqamaId) {
+                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                return;
+            }
+
             try {
                 const snapshot = await getDocs(collection(db, "students"));
+                const students = [];
+
                 snapshot.forEach(docSnapshot => {
                     const student = docSnapshot.data();
+                    
+                    // Filter students based on iqamaId
+                    if (student.iqamaId === iqamaId) {
+                        students.push({
+                            id: docSnapshot.id,
+                            matricule: student.matricule,
+                            password: student.password
+                        });
+                    }
+                });
+
+                // Sort students alphabetically by matricule
+                students.sort((a, b) => a.matricule.localeCompare(b.matricule));
+
+                // Add sorted students to the list
+                students.forEach(student => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="px-4 py-2 border-b">${student.matricule}</td>
                         <td class="px-4 py-2 border-b">${student.password}</td>
                         <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${docSnapshot.id}', '${student.matricule}', '${student.password}')">تعديل</button>
-                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteStudent('${docSnapshot.id}')">حذف</button>
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${student.id}', '${student.matricule}', '${student.password}')">تعديل</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteStudent('${student.id}')">حذف</button>
                         </td>
                     `;
                     studentList.appendChild(tr);
@@ -219,21 +282,12 @@
             displayStudentList();
         });
 
-        function showSuccessAlert(message) {
-            const alert = document.getElementById('success-alert');
-            alert.textContent = message;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
+        // Sort students alphabetically when button is clicked
+        document.getElementById('sort-student-list-btn').addEventListener('click', function () {
+            displayStudentList(); // Sort and display the list
+        });
 
-        function showErrorAlert(message) {
-            const alert = document.getElementById('error-alert');
-            alert.textContent = message;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
-
-        // Search functionality
+        // Search functionality for students
         document.getElementById('search-bar').addEventListener('input', function () {
             const searchQuery = this.value.toLowerCase();
             const rows = document.querySelectorAll('#student-list tr');

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الإقامة الجامعية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 space-y-8">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-800">لوحة تحكم الإقامة الجامعية</h1>
+        </div>
+
+        <!-- Student Registration Section -->
+        <div class="bg-white shadow-md rounded-lg p-6 flex-1 text-center hover:scale-105 transition-transform duration-300">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">تسجيل الطلبة</h2>
+            <p class="text-gray-600 mb-4">يمكنك هنا تسجيل الطلبة المقيمين في الإقامة الجامعية</p>
+            <form id="studentForm">
+                <input type="text" id="name" placeholder="اسم الطالب" class="mb-2 px-4 py-2 border rounded" required />
+                <input type="text" id="matricule" placeholder="رقم التسجيل" class="mb-2 px-4 py-2 border rounded" required />
+                <input type="text" id="room" placeholder="الغرفة" class="mb-2 px-4 py-2 border rounded" required />
+                <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">إضافة الطالب</button>
+            </form>
+        </div>
+
+        <!-- Display Success Message -->
+        <div id="successMessage" class="hidden bg-green-500 text-white p-4 rounded-lg text-center">
+            <p>تم إضافة الطالب بنجاح</p>
+        </div>
+
+        <!-- Display All Students in a Table -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">الطلاب والغرف</h2>
+            <p class="text-gray-600 mb-4">عرض الطلاب مع الغرف الخاصة بهم</p>
+            <div id="studentsList" class="overflow-x-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border px-4 py-2 text-gray-600 text-sm">الاسم</th>
+                            <th class="border px-4 py-2 text-gray-600 text-sm">رقم التسجيل</th>
+                            <th class="border px-4 py-2 text-gray-600 text-sm">الغرفة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Student List Items will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.appspot.com",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Handle form submission for adding a student
+        document.getElementById('studentForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const matricule = document.getElementById('matricule').value;
+            const room = document.getElementById('room').value;
+            
+            // Retrieve IQAMA ID from localStorage
+            const iqamaId = localStorage.getItem('iqamaId');
+            
+            if (!iqamaId) {
+                alert("خطأ: لم يتم العثور على رقم الإقامة");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "student_housing"), {
+                    name,
+                    matricule,
+                    room,
+                    iqamaId
+                });
+
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    successMessage.classList.add('hidden');
+                }, 3000);
+
+                // Refresh the student list
+                displayStudents();
+            } catch (error) {
+                alert('خطأ في إضافة الطالب');
+            }
+
+            // Clear form after submission
+            document.getElementById('studentForm').reset();
+        });
+
+        // Display all students in a table
+        async function displayStudents() {
+            const studentsTableBody = document.getElementById('studentsTableBody');
+            studentsTableBody.innerHTML = ''; // Clear previous list
+
+            try {
+                const snapshot = await getDocs(collection(db, "student_housing"));
+                snapshot.forEach(doc => {
+                    const student = doc.data();
+                    const studentRow = document.createElement('tr');
+                    studentRow.classList.add('hover:bg-gray-50');
+                    studentRow.innerHTML = `
+                        <td class="border px-4 py-2">${student.name}</td>
+                        <td class="border px-4 py-2">${student.matricule}</td>
+                        <td class="border px-4 py-2">${student.room}</td>
+                    `;
+                    studentsTableBody.appendChild(studentRow);
+                });
+            } catch {
+                studentsTableBody.innerHTML = '<tr><td colspan="3" class="text-red-500 text-center">حدث خطأ في تحميل بيانات الطلاب</td></tr>';
+            }
+        }
+
+        // Load all students when the page is loaded
+        window.onload = function () {
+            displayStudents();
+        };
+    </script>
+</body>
+
+</html>
