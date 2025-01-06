@@ -55,7 +55,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
@@ -115,8 +115,22 @@
             const studentsTableBody = document.getElementById('studentsTableBody');
             studentsTableBody.innerHTML = ''; // Clear previous list
 
+            const iqamaId = localStorage.getItem('iqamaId');
+            if (!iqamaId) {
+                alert("خطأ: لم يتم العثور على رقم الإقامة");
+                return;
+            }
+
             try {
-                const snapshot = await getDocs(collection(db, "student_housing"));
+                // Query Firestore to find students with the same IQAMA ID
+                const q = query(collection(db, "student_housing"), where("iqamaId", "==", iqamaId));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    studentsTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-600">لا توجد بيانات للطلاب</td></tr>';
+                    return;
+                }
+
                 snapshot.forEach(doc => {
                     const student = doc.data();
                     const studentRow = document.createElement('tr');
@@ -128,7 +142,7 @@
                     `;
                     studentsTableBody.appendChild(studentRow);
                 });
-            } catch {
+            } catch (error) {
                 studentsTableBody.innerHTML = '<tr><td colspan="3" class="text-red-500 text-center">حدث خطأ في تحميل بيانات الطلاب</td></tr>';
             }
         }
