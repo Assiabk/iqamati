@@ -15,21 +15,10 @@
             <h1 class="text-2xl font-bold text-gray-800">لوحة تحكم الإقامة الجامعية</h1>
         </div>
 
-        <!-- Student Registration Section -->
-        <div class="bg-white shadow-md rounded-lg p-6 flex-1 text-center hover:scale-105 transition-transform duration-300">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">تسجيل الطلبة</h2>
-            <p class="text-gray-600 mb-4">يمكنك هنا تسجيل الطلبة المقيمين في الإقامة الجامعية</p>
-            <form id="studentForm">
-                <input type="text" id="name" placeholder="اسم الطالب" class="mb-2 px-4 py-2 border rounded" required />
-                <input type="text" id="matricule" placeholder="رقم التسجيل" class="mb-2 px-4 py-2 border rounded" required />
-                <input type="text" id="room" placeholder="الغرفة" class="mb-2 px-4 py-2 border rounded" required />
-                <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">إضافة الطالب</button>
-            </form>
-        </div>
-
-        <!-- Display Success Message -->
-        <div id="successMessage" class="hidden bg-green-500 text-white p-4 rounded-lg text-center">
-            <p>تم إضافة الطالب بنجاح</p>
+        <!-- Search Bar -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">بحث عن غرفة</h2>
+            <input type="text" id="roomSearch" class="border p-2 rounded w-full" placeholder="ابحث عن رقم الغرفة" />
         </div>
 
         <!-- Display All Students in a Table -->
@@ -40,22 +29,27 @@
                 <table class="min-w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="border px-4 py-2 text-gray-600 text-sm">الاسم</th>
+                            <th class="border px-4 py-2 text-gray-600 text-sm">اسم الطالب</th>
                             <th class="border px-4 py-2 text-gray-600 text-sm">رقم التسجيل</th>
-                            <th class="border px-4 py-2 text-gray-600 text-sm">الغرفة</th>
+                            <th class="border px-4 py-2 text-gray-600 text-sm">رقم الغرفة</th>
                         </tr>
                     </thead>
                     <tbody id="studentsTableBody">
-                        <!-- Student List Items will be dynamically added here -->
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Room Details Display -->
+        <div id="roomDetails" class="bg-white shadow-md rounded-lg p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">تفاصيل الغرفة</h2>
+            <p id="roomInfo" class="text-gray-600"></p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
@@ -69,49 +63,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Handle form submission for adding a student
-        document.getElementById('studentForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const matricule = document.getElementById('matricule').value;
-            const room = document.getElementById('room').value;
-            
-            // Retrieve IQAMA ID from localStorage
-            const iqamaId = localStorage.getItem('iqamaId');
-            
-            if (!iqamaId) {
-                alert("خطأ: لم يتم العثور على رقم الإقامة");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "student_housing"), {
-                    name,
-                    matricule,
-                    room,
-                    iqamaId
-                });
-
-                // Show success message
-                const successMessage = document.getElementById('successMessage');
-                successMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    successMessage.classList.add('hidden');
-                }, 3000);
-
-                // Refresh the student list
-                displayStudents();
-            } catch (error) {
-                alert('خطأ في إضافة الطالب');
-            }
-
-            // Clear form after submission
-            document.getElementById('studentForm').reset();
-        });
-
         // Display all students in a table
-        async function displayStudents() {
+        async function displayStudents(roomSearch = "") {
             const studentsTableBody = document.getElementById('studentsTableBody');
             studentsTableBody.innerHTML = ''; // Clear previous list
 
@@ -122,8 +75,8 @@
             }
 
             try {
-                // Query Firestore to find students with the same IQAMA ID
-                const q = query(collection(db, "student_housing"), where("iqamaId", "==", iqamaId));
+                // Query Firestore to find students with the same IQAMA ID, and filter by room number if provided
+                const q = roomSearch ? query(collection(db, "student_housing"), where("iqamaId", "==", iqamaId), where("roomNumber", "==", roomSearch)) : query(collection(db, "student_housing"), where("iqamaId", "==", iqamaId));
                 const snapshot = await getDocs(q);
 
                 if (snapshot.empty) {
@@ -136,9 +89,9 @@
                     const studentRow = document.createElement('tr');
                     studentRow.classList.add('hover:bg-gray-50');
                     studentRow.innerHTML = `
-                        <td class="border px-4 py-2">${student.name}</td>
+                        <td class="border px-4 py-2">${student.studentName}</td>
                         <td class="border px-4 py-2">${student.matricule}</td>
-                        <td class="border px-4 py-2">${student.room}</td>
+                        <td class="border px-4 py-2">${student.roomNumber}</td>
                     `;
                     studentsTableBody.appendChild(studentRow);
                 });
@@ -146,6 +99,21 @@
                 studentsTableBody.innerHTML = '<tr><td colspan="3" class="text-red-500 text-center">حدث خطأ في تحميل بيانات الطلاب</td></tr>';
             }
         }
+
+        // Search room function
+        function searchRoom() {
+            const roomSearch = document.getElementById('roomSearch').value.trim();
+            displayStudents(roomSearch);
+            if (roomSearch) {
+                document.getElementById('roomDetails').classList.remove('hidden');
+                document.getElementById('roomInfo').textContent = `تم العثور على الغرفة رقم: ${roomSearch}`;
+            } else {
+                document.getElementById('roomDetails').classList.add('hidden');
+            }
+        }
+
+        // Add an event listener to the search input
+        document.getElementById('roomSearch').addEventListener('input', searchRoom);
 
         // Load all students when the page is loaded
         window.onload = function () {

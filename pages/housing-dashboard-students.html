@@ -46,43 +46,64 @@
     <!-- Main Container -->
     <div class="container mx-auto p-6">
         <!-- Add Student Form -->
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">إضافة طالب جديد</h3>
-            <form id="addStudentForm" class="space-y-4">
-                <input type="text" id="matricule" placeholder="رقم الطالب" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="text" id="studentName" placeholder="اسم الطالب" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="text" id="roomNumber" placeholder="رقم الغرفة" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="number" id="studentCount" placeholder="عدد الطلاب في الغرفة" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="number" id="bedCount" placeholder="عدد الأسرة" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="number" id="chairCount" placeholder="عدد الكراسي" class="w-full px-4 py-2 border rounded-lg" required>
-                <input type="number" id="tableCount" placeholder="عدد الطاولات" class="w-full px-4 py-2 border rounded-lg" required>
-                <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 w-full">إضافة الطالب</button>
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6 transition-all hover:shadow-xl">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">إضافة طالب جديد</h3>
+            <form id="addStudentForm" class="space-y-6">
+                <input type="text" id="matricule" placeholder="رقم الطالب" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" id="studentName" placeholder="اسم الطالب" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" id="roomNumber" placeholder="رقم الغرفة" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="number" id="studentCount" placeholder="عدد الطلاب في الغرفة" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="number" id="bedCount" placeholder="عدد الأسرة" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="number" id="chairCount" placeholder="عدد الكراسي" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <input type="number" id="tableCount" placeholder="عدد الطاولات" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 w-full transition duration-300 ease-in-out transform hover:scale-105">إضافة الطالب</button>
             </form>
         </div>
 
         <!-- Show Students Button -->
         <div class="text-center mb-6">
-            <button id="showStudentsBtn" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600">عرض قائمة الطلاب</button>
+            <button id="showStudentsBtn" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 w-full sm:w-auto transition duration-300">عرض قائمة الطلاب</button>
         </div>
+<!-- Button to open the modal -->
+<button id="openModalButton" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 mb-6 w-48 mx-auto block">إضافة طالب إلى غرفة موجودة</button>
 
+<!-- Modal (Initially hidden) -->
+<div id="addToExistingRoomModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">إضافة طالب إلى غرفة موجودة</h3>
+        <form id="addToExistingRoomForm" class="space-y-6">
+            <input type="text" id="newMatricule" placeholder="رقم الطالب" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+            <input type="text" id="newStudentName" placeholder="اسم الطالب" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+            
+            <!-- Select existing room -->
+            <select id="existingRoomSelect" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                <option value="">اختر غرفة</option>
+            </select>
+
+            <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 w-full transition duration-300 ease-in-out transform hover:scale-105">إضافة الطالب إلى الغرفة</button>
+        </form>
+        <!-- Close button -->
+        <button id="closeModalButton" class="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 w-full transition duration-300 ease-in-out transform hover:scale-105">إغلاق</button>
+    </div>
+</div>
         <!-- Add Search Bar -->
-        <div class="mb-4">
-            <input type="text" id="searchInput" placeholder="ابحث بواسطة الاسم أو رقم الطالب أو الغرفة" class="w-full px-4 py-2 border rounded-lg" />
+        <div class="mb-6">
+            <input type="text" id="searchInput" placeholder="ابحث بواسطة الاسم أو رقم الطالب أو الغرفة" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" />
         </div>
 
         <!-- Students Table -->
         <div id="studentsTableContainer" class="hidden overflow-x-auto bg-white shadow-md rounded-lg p-4">
-            <table class="min-w-full border" id="studentsTable">
+            <table class="min-w-full border text-center" id="studentsTable">
                 <thead class="bg-orange-500 text-white">
                     <tr>
-                        <th class="py-2 px-4">رقم الطالب</th>
-                        <th class="py-2 px-4">اسم الطالب</th>
-                        <th class="py-2 px-4">الغرفة</th>
-                        <th class="py-2 px-4">عدد الطلاب</th>
-                        <th class="py-2 px-4">عدد الأسرة</th>
-                        <th class="py-2 px-4">عدد الكراسي</th>
-                        <th class="py-2 px-4">عدد الطاولات</th>
-                        <th class="py-2 px-4">الإجراءات</th>
+                        <th class="py-3 px-6">رقم الطالب</th>
+                        <th class="py-3 px-6">اسم الطالب</th>
+                        <th class="py-3 px-6">الغرفة</th>
+                        <th class="py-3 px-6">عدد الطلاب</th>
+                        <th class="py-3 px-6">عدد الأسرة</th>
+                        <th class="py-3 px-6">عدد الكراسي</th>
+                        <th class="py-3 px-6">عدد الطاولات</th>
+                        <th class="py-3 px-6">الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody><!-- Dynamic content --></tbody>
@@ -95,11 +116,14 @@
         <div class="modal-content">
             <h3 class="text-xl font-semibold mb-4">هل أنت متأكد أنك تريد حذف هذا الطالب؟</h3>
             <div>
-                <button id="confirmDelete" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">نعم</button>
-                <button id="cancelDelete" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600">إلغاء</button>
+                <button id="confirmDelete" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition">نعم</button>
+                <button id="cancelDelete" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">إلغاء</button>
             </div>
         </div>
     </div>
+
+   
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -208,48 +232,48 @@
             setTimeout(() => errorAlert.remove(), 3000);
         }
     
-        // Display student list from student_housing collection
         async function displayStudentList() {
-            const studentsTableBody = document.getElementById('studentsTable').getElementsByTagName('tbody')[0];
-            studentsTableBody.innerHTML = '';
-    
-            // Retrieve iqamaId from localStorage
-            const iqamaId = localStorage.getItem('iqamaId');
-    
-            if (!iqamaId) {
-                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
-                return;
+    const studentsTableBody = document.getElementById('studentsTable').getElementsByTagName('tbody')[0];
+    studentsTableBody.innerHTML = '';
+
+    const iqamaId = localStorage.getItem('iqamaId');
+    if (!iqamaId) {
+        showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+        return;
+    }
+
+    try {
+        const snapshot = await getDocs(collection(db, "student_housing"));
+        snapshot.forEach(docSnapshot => {
+            const student = docSnapshot.data();
+            
+            // Debugging: Log the student data to see if fields are missing or undefined
+            console.log("Student Data:", student);
+
+            // Filter students based on iqamaId
+            if (student.iqamaId === iqamaId) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2 border-b">${student.matricule}</td>
+                    <td class="px-4 py-2 border-b">${student.studentName}</td>
+                    <td class="px-4 py-2 border-b">${student.roomNumber}</td>
+                    <td class="px-4 py-2 border-b">${student.studentCount || 'N/A'}</td> <!-- Default value if missing -->
+                    <td class="px-4 py-2 border-b">${student.bedCount || 'N/A'}</td> <!-- Default value if missing -->
+                    <td class="px-4 py-2 border-b">${student.chairCount || 'N/A'}</td> <!-- Default value if missing -->
+                    <td class="px-4 py-2 border-b">${student.tableCount || 'N/A'}</td> <!-- Default value if missing -->
+                    <td class="px-4 py-2 border-b">
+                        <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${docSnapshot.id}', '${student.matricule}', '${student.studentName}', '${student.roomNumber}', '${student.studentCount}', '${student.bedCount}', '${student.chairCount}', '${student.tableCount}')">تعديل</button>
+                        <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteStudent('${docSnapshot.id}')">حذف</button>
+                    </td>
+                `;
+                studentsTableBody.appendChild(tr);
             }
-    
-            try {
-                const snapshot = await getDocs(collection(db, "student_housing"));
-                snapshot.forEach(docSnapshot => {
-                    const student = docSnapshot.data();
-    
-                    // Filter students based on iqamaId
-                    if (student.iqamaId === iqamaId) {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="px-4 py-2 border-b">${student.matricule}</td>
-                            <td class="px-4 py-2 border-b">${student.studentName}</td>
-                            <td class="px-4 py-2 border-b">${student.roomNumber}</td>
-                            <td class="px-4 py-2 border-b">${student.studentCount}</td>
-                            <td class="px-4 py-2 border-b">${student.bedCount}</td>
-                            <td class="px-4 py-2 border-b">${student.chairCount}</td>
-                            <td class="px-4 py-2 border-b">${student.tableCount}</td>
-                            <td class="px-4 py-2 border-b">
-                                <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${docSnapshot.id}', '${student.matricule}', '${student.studentName}', '${student.roomNumber}', '${student.studentCount}', '${student.bedCount}', '${student.chairCount}', '${student.tableCount}')">تعديل</button>
-                                <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteStudent('${docSnapshot.id}')">حذف</button>
-                            </td>
-                        `;
-                        studentsTableBody.appendChild(tr);
-                    }
-                });
-            } catch {
-                showErrorAlert('خطأ في تحميل قائمة الطلاب');
-            }
-        }
-    
+        });
+    } catch {
+        showErrorAlert('خطأ في تحميل قائمة الطلاب');
+    }
+}
+
         window.editStudent = function (id, matricule, studentName, roomNumber, studentCount, bedCount, chairCount, tableCount) {
             currentStudentId = id;
             document.getElementById('matricule').value = matricule;
@@ -308,8 +332,127 @@
                 }
             });
         });
+     // Open the modal when the button is clicked
+document.getElementById('openModalButton').addEventListener('click', function () {
+    document.getElementById('addToExistingRoomModal').classList.remove('hidden');
+});
 
-    
+// Close the modal when the close button is clicked
+document.getElementById('closeModalButton').addEventListener('click', function () {
+    document.getElementById('addToExistingRoomModal').classList.add('hidden');
+});
+
+// Handle form submission
+document.getElementById('addToExistingRoomForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const matricule = document.getElementById('newMatricule').value;
+    const studentName = document.getElementById('newStudentName').value;
+    const roomNumber = document.getElementById('existingRoomSelect').value;
+
+    if (!roomNumber) {
+        showErrorAlert('يرجى اختيار غرفة');
+        return;
+    }
+
+    // Retrieve iqamaId from localStorage
+    const iqamaId = localStorage.getItem('iqamaId');
+    if (!iqamaId) {
+        showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+        return;
+    }
+
+    try {
+        // Get the room document to update the student count
+        const roomDoc = await getDocs(query(collection(db, "student_housing"), where("roomNumber", "==", roomNumber)));
+        if (roomDoc.empty) {
+            showErrorAlert('الغرفة غير موجودة');
+            return;
+        }
+
+        // Update the student count for the selected room
+        const roomData = roomDoc.docs[0].data();
+        const newStudentCount = parseInt(roomData.studentCount) + 1; // Increment the student count by 1
+
+        // Add new student to the room
+        await addDoc(collection(db, "student_housing"), {
+            matricule,
+            studentName,
+            roomNumber,
+            studentCount: newStudentCount,
+            iqamaId
+        });
+
+        // Update the room's student count in the database
+        await updateDoc(doc(db, "student_housing", roomDoc.docs[0].id), { studentCount: newStudentCount });
+
+        showSuccessAlert('تم إضافة الطالب إلى الغرفة بنجاح');
+    } catch (error) {
+        showErrorAlert('خطأ في إضافة الطالب إلى الغرفة');
+    }
+
+    // Clear form fields
+    document.getElementById('newMatricule').value = '';
+    document.getElementById('newStudentName').value = '';
+    document.getElementById('existingRoomSelect').value = '';
+    displayStudentList();
+
+    // Close the modal after successful submission
+    document.getElementById('addToExistingRoomModal').classList.add('hidden');
+});
+
+// Load existing rooms into the dropdown
+async function loadExistingRooms() {
+    const existingRoomSelect = document.getElementById('existingRoomSelect');
+    try {
+        const snapshot = await getDocs(collection(db, "student_housing"));
+        const rooms = new Set();
+
+        snapshot.forEach(docSnapshot => {
+            const student = docSnapshot.data();
+            rooms.add(student.roomNumber); // Add unique room numbers
+        });
+
+        // Populate room dropdown
+        rooms.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room;
+            option.textContent = `غرفة ${room}`;
+            existingRoomSelect.appendChild(option);
+        });
+    } catch {
+        showErrorAlert('خطأ في تحميل الغرف');
+    }
+}
+
+// Add event listener to load room details based on selected room
+document.getElementById('existingRoomSelect').addEventListener('change', async function (e) {
+    const roomNumber = e.target.value;
+    if (roomNumber) {
+        await fetchRoomDetails(roomNumber);
+    }
+});
+
+// Function to fetch room details
+async function fetchRoomDetails(roomNumber) {
+    const q = query(collection(db, "student_housing"), where("roomNumber", "==", roomNumber));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+        const room = querySnapshot.docs[0].data();
+        
+        // Populate the form fields with the room details
+        document.getElementById('bedCount').value = room.bedCount || '';
+        document.getElementById('chairCount').value = room.chairCount || '';
+        document.getElementById('tableCount').value = room.tableCount || '';
+    } else {
+        showErrorAlert('لم يتم العثور على بيانات للغرفة');
+    }
+}
+
+// Call the function to load rooms on page load
+loadExistingRooms();
+
     </script>
     
 </html>

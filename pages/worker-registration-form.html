@@ -37,6 +37,20 @@
                     <input type="password" id="worker-password" name="worker-password" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
                     <p id="password-error" class="text-red-500 text-xs hidden">يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.</p>
                 </div>
+                <!-- Department Field -->
+                <div>
+                    <label for="worker-department" class="block text-gray-600 text-sm">القسم</label>
+                    <select id="worker-department" name="worker-department" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
+                        <option value="الإدارة">الإدارة</option>
+                        <option value="الإيواء">الإيواء</option>
+                        <option value="الإطعام">الإطعام</option>
+                        <option value="المتابعة الصحية">المتابعة الصحية</option>
+                        <option value="الانشطة الثقافية و الرياضية">الانشطة الثقافية و الرياضية</option>
+                        <option value="الصيانة">الصيانة</option>
+                        <option value="الأمن">الأمن</option>
+                        <option value="التنظيف">التنظيف</option>
+                    </select>
+                </div>
                 <button type="submit" class="bg-orange-500 text-white px-4 py-1 rounded-lg hover:bg-orange-600 transition duration-300 w-full text-sm">تسجيل العامل</button>
             </form>
         </div>
@@ -70,6 +84,7 @@
                         <tr>
                             <th class="border px-2 py-1 text-gray-600 text-sm">اسم العامل</th>
                             <th class="border px-2 py-1 text-gray-600 text-sm">كلمة المرور</th>
+                            <th class="border px-2 py-1 text-gray-600 text-sm">القسم</th>
                             <th class="border px-2 py-1 text-gray-600 text-sm">الإجراءات</th>
                         </tr>
                     </thead>
@@ -91,6 +106,7 @@
             </div>
         </div>
     </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -117,6 +133,7 @@
     
             const name = document.getElementById('worker-name').value;
             const password = document.getElementById('worker-password').value;
+            const department = document.getElementById('worker-department').value; // Get selected department
     
             if (password.length < 8) {
                 document.getElementById('password-error').classList.remove('hidden');
@@ -148,6 +165,7 @@
                     await updateDoc(doc(db, "workers", currentWorkerId), {
                         name,
                         password,
+                        department, // Update department
                         iqamaId
                     });
                     showSuccessAlert('تم تحديث بيانات العامل بنجاح');
@@ -157,6 +175,7 @@
                     await addDoc(collection(db, "workers"), {
                         name,
                         password,
+                        department, // Store department
                         iqamaId
                     });
                     showSuccessAlert('تم إضافة العامل بنجاح');
@@ -168,6 +187,7 @@
             // Clear form fields
             document.getElementById('worker-name').value = '';
             document.getElementById('worker-password').value = '';
+            document.getElementById('worker-department').value = ''; // Reset department selection
             displayWorkerList();
         });
     
@@ -204,13 +224,14 @@
     
                 snapshot.forEach(docSnapshot => {
                     const worker = docSnapshot.data();
-                    
+    
                     // Filter workers based on iqamaId
                     if (worker.iqamaId === iqamaId) {
                         workers.push({
                             id: docSnapshot.id,
                             name: worker.name,
-                            password: worker.password
+                            password: worker.password,
+                            department: worker.department // Include department in the worker object
                         });
                     }
                 });
@@ -230,8 +251,9 @@
                     tr.innerHTML = `
                         <td class="px-4 py-2 border-b">${worker.name}</td>
                         <td class="px-4 py-2 border-b">${worker.password}</td>
+                        <td class="px-4 py-2 border-b">${worker.department}</td> <!-- Display department -->
                         <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}')">تعديل</button>
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}', '${worker.department}')">تعديل</button>
                             <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteWorker('${worker.id}')">حذف</button>
                         </td>
                     `;
@@ -288,8 +310,9 @@
             rows.forEach(row => {
                 const name = row.children[0]?.textContent.toLowerCase();
                 const password = row.children[1]?.textContent.toLowerCase();
+                const department = row.children[2]?.textContent.toLowerCase();
     
-                if (name.includes(searchQuery) || password.includes(searchQuery)) {
+                if (name.includes(searchQuery) || password.includes(searchQuery) || department.includes(searchQuery)) {
                     row.classList.remove('hidden');
                 } else {
                     row.classList.add('hidden');
@@ -297,7 +320,5 @@
             });
         });
     </script>
-    
 </body>
-
-</html>
+</html>    

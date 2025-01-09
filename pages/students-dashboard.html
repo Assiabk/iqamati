@@ -29,6 +29,11 @@
             <h2 class="text-xl font-semibold text-gray-800 mb-4">إضافة طالب جديد</h2>
             <form id="student-form" class="space-y-4">
                 <div>
+                    <label for="student-name" class="block text-gray-600">اسم الطالب الكامل</label>
+                    <input type="text" id="student-name" name="student-name" required
+                        class="w-full p-2 rounded-lg border border-gray-300">
+                </div>
+                <div>
                     <label for="student-matricule" class="block text-gray-600">رقم الطالب</label>
                     <input type="text" id="student-matricule" name="student-matricule" required
                         class="w-full p-2 rounded-lg border border-gray-300">
@@ -81,6 +86,7 @@
                 <table class="w-full table-auto border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
+                            <th class="px-4 py-2 border">اسم  الطالب</th>
                             <th class="px-4 py-2 border">رقم الطالب</th>
                             <th class="px-4 py-2 border">كلمة المرور</th>
                             <th class="px-4 py-2 border">الإجراءات</th>
@@ -126,7 +132,7 @@
         // Handle form submission for adding or updating students
         document.getElementById('student-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-
+            const name = document.getElementById('student-name').value;
             const matricule = document.getElementById('student-matricule').value;
             const password = document.getElementById('student-password').value;
 
@@ -157,18 +163,20 @@
                 if (currentStudentId) {
                     // Update existing student
                     await updateDoc(doc(db, "students", currentStudentId), {
+                        name,
                         matricule,
                         password,
-                        iqamaId // Add iqamaId to the student document
+                        iqamaId 
                     });
                     showSuccessAlert('تم تحديث بيانات الطالب بنجاح');
                     currentStudentId = null;
                 } else {
                     // Add new student
                     await addDoc(collection(db, "students"), {
+                        name,
                         matricule,
                         password,
-                        iqamaId // Add iqamaId to the new student document
+                        iqamaId 
                     });
                     showSuccessAlert('تم إضافة الطالب بنجاح');
                 }
@@ -176,7 +184,8 @@
                 showErrorAlert('خطأ في معالجة الطالب');
             }
 
-            // Clear form fields
+          
+            document.getElementById('student-name').value = '';
             document.getElementById('student-matricule').value = '';
             document.getElementById('student-password').value = '';
             displayStudentList();
@@ -219,6 +228,7 @@
                     if (student.iqamaId === iqamaId) {
                         students.push({
                             id: docSnapshot.id,
+                            name:student.name,
                             matricule: student.matricule,
                             password: student.password
                         });
@@ -232,10 +242,11 @@
                 students.forEach(student => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
+                     <td class="px-4 py-2 border-b">${student.name}</td>
                         <td class="px-4 py-2 border-b">${student.matricule}</td>
                         <td class="px-4 py-2 border-b">${student.password}</td>
                         <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${student.id}', '${student.matricule}', '${student.password}')">تعديل</button>
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editStudent('${student.id}','${student.name}', ,'${student.matricule}', '${student.password}')">تعديل</button>
                             <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteStudent('${student.id}')">حذف</button>
                         </td>
                     `;
@@ -246,8 +257,9 @@
             }
         }
 
-        window.editStudent = function (id, matricule, password) {
+        window.editStudent = function (id, name,matricule, password) {
             currentStudentId = id;
+            document.getElementById('student-name').value = name;
             document.getElementById('student-matricule').value = matricule;
             document.getElementById('student-password').value = password;
         }
@@ -293,10 +305,11 @@
             const rows = document.querySelectorAll('#student-list tr');
 
             rows.forEach(row => {
-                const matricule = row.children[0]?.textContent.toLowerCase();
-                const password = row.children[1]?.textContent.toLowerCase();
+                const name = row.children[0]?.textContent.toLowerCase();
+                const matricule = row.children[1]?.textContent.toLowerCase();
+                const password = row.children[2]?.textContent.toLowerCase();
 
-                if (matricule.includes(searchQuery) || password.includes(searchQuery)) {
+                if (name.includes(searchQuery) ||matricule.includes(searchQuery) || password.includes(searchQuery)) {
                     row.classList.remove('hidden');
                 } else {
                     row.classList.add('hidden');
