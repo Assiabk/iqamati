@@ -55,6 +55,22 @@
             </form>
         </div>
 
+        <!-- Program Upload Section -->
+        <div class="bg-white shadow-md rounded-lg p-4 max-w-sm mx-auto">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">رفع البرنامج</h2>
+            <form id="program-form" class="space-y-3">
+                <div>
+                    <label for="program-name" class="block text-gray-600 text-sm">اسم البرنامج</label>
+                    <input type="text" id="program-name" name="program-name" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
+                </div>
+                <div>
+                    <label for="program-file" class="block text-gray-600 text-sm">اختر الملف</label>
+                    <input type="file" id="program-file" name="program-file" required class="w-full p-2 text-sm rounded-lg border border-gray-300">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-600 transition duration-300 w-full text-sm">رفع البرنامج</button>
+            </form>
+        </div>
+
         <!-- Centered Toggle Button for Worker List -->
         <div class="flex justify-center">
             <button id="toggle-worker-list-btn" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 mb-4 text-sm">إظهار/إخفاء قائمة العمال</button>
@@ -66,6 +82,9 @@
                 ترتيب العمال أبجديًا
             </button>
         </div>
+
+     
+        
 
         <!-- Worker List Table -->
         <div id="worker-table-container" class="bg-white shadow-md rounded-lg p-4 hidden max-w-3xl mx-auto">
@@ -94,6 +113,33 @@
                 </table>
             </div>
         </div>
+        <div id="button-container" style="display: flex; justify-content: center; align-items: center; ">
+            <button
+              id="toggle-program-list-btn"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg"
+            >
+              عرض قائمة البرامج
+            </button>
+          </div>
+          
+          <div id="program-table-container" class="hidden">
+            <table id="program-list" class="min-w-full table-auto">
+              <thead>
+                <tr>
+                  <th class="px-4 py-2 border-b">اسم البرنامج</th>
+                  <th class="px-4 py-2 border-b">الملف</th>
+                  <th class="px-4 py-2 border-b">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Program list rows will be dynamically inserted here -->
+              </tbody>
+            </table>
+          </div>
+          
+<div id="alert-container" class="mb-4"></div>
+
+
     </div>
 
     <!-- Confirmation Modal -->
@@ -107,11 +153,11 @@
         </div>
     </div>
 
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-    
+        
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -120,165 +166,155 @@
             messagingSenderId: "240286199373",
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
-    
+        
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-    
+        
+        // Global variables
         let currentWorkerId = null;
-        let isAscending = true; // To keep track of sort order (ascending/descending)
-    
-        // Handle form submission for adding or updating worker
-        document.getElementById('worker-form').addEventListener('submit', async function (e) {
+        let isAscending = true; // Sort order (ascending/descending)
+        
+        // Handle worker form submission
+        document.getElementById('worker-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-    
+        
             const name = document.getElementById('worker-name').value;
             const password = document.getElementById('worker-password').value;
-            const department = document.getElementById('worker-department').value; // Get selected department
-    
+            const department = document.getElementById('worker-department').value;
+        
             if (password.length < 8) {
-                document.getElementById('password-error').classList.remove('hidden');
+                showErrorAlert('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل');
                 return;
-            } else {
-                document.getElementById('password-error').classList.add('hidden');
             }
-    
-            // Retrieve iqamaId from localStorage
+        
             const iqamaId = localStorage.getItem('iqamaId');
-    
             if (!iqamaId) {
-                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                showErrorAlert('لم يتم العثور على رقم الإقامة');
                 return;
             }
-    
-            // Check if the worker already exists
-            const q = query(collection(db, "workers"), where("name", "==", name));
-            const querySnapshot = await getDocs(q);
-    
+        
+            const workerQuery = query(collection(db, "workers"), where("name", "==", name));
+            const querySnapshot = await getDocs(workerQuery);
+        
             if (!querySnapshot.empty && currentWorkerId === null) {
                 showErrorAlert('اسم العامل موجود بالفعل');
                 return;
             }
-    
+        
             try {
                 if (currentWorkerId) {
-                    // Update existing worker
+                    // Update worker
                     await updateDoc(doc(db, "workers", currentWorkerId), {
-                        name,
-                        password,
-                        department, // Update department
-                        iqamaId
+                        name, password, department, iqamaId
                     });
                     showSuccessAlert('تم تحديث بيانات العامل بنجاح');
                     currentWorkerId = null;
                 } else {
                     // Add new worker
                     await addDoc(collection(db, "workers"), {
-                        name,
-                        password,
-                        department, // Store department
-                        iqamaId
+                        name, password, department, iqamaId
                     });
                     showSuccessAlert('تم إضافة العامل بنجاح');
                 }
             } catch {
-                showErrorAlert('خطأ في معالجة العامل');
+                showErrorAlert('خطأ في معالجة البيانات');
             }
-    
-            // Clear form fields
+        
+            // Clear form
             document.getElementById('worker-name').value = '';
             document.getElementById('worker-password').value = '';
-            document.getElementById('worker-department').value = ''; // Reset department selection
+            document.getElementById('worker-department').value = '';
             displayWorkerList();
         });
-    
+        
+        // Show success alert
         function showSuccessAlert(message) {
             const alert = document.getElementById('success-alert');
             alert.textContent = message;
             alert.classList.remove('hidden');
             setTimeout(() => alert.classList.add('hidden'), 3000);
         }
-    
+        
+        // Show error alert
         function showErrorAlert(message) {
             const alert = document.getElementById('error-alert');
             alert.textContent = message;
             alert.classList.remove('hidden');
             setTimeout(() => alert.classList.add('hidden'), 3000);
         }
-    
-        // Function to display worker list and sort alphabetically
+        
+        // Display worker list
         async function displayWorkerList() {
             const workerList = document.getElementById('worker-list');
             workerList.innerHTML = '';
-    
-            // Retrieve iqamaId from localStorage
+        
             const iqamaId = localStorage.getItem('iqamaId');
-    
             if (!iqamaId) {
-                showErrorAlert('حدث خطأ: لم يتم العثور على رقم الإقامة');
+                showErrorAlert('لم يتم العثور على رقم الإقامة');
                 return;
             }
-    
+        
             try {
                 const snapshot = await getDocs(collection(db, "workers"));
                 let workers = [];
-    
+        
                 snapshot.forEach(docSnapshot => {
                     const worker = docSnapshot.data();
-    
-                    // Filter workers based on iqamaId
                     if (worker.iqamaId === iqamaId) {
                         workers.push({
                             id: docSnapshot.id,
                             name: worker.name,
                             password: worker.password,
-                            department: worker.department // Include department in the worker object
+                            department: worker.department
                         });
                     }
                 });
-    
-                // Sort workers alphabetically by name
-                workers.sort((a, b) => {
-                    if (isAscending) {
-                        return a.name.localeCompare(b.name);
-                    } else {
-                        return b.name.localeCompare(a.name);
-                    }
-                });
-    
-                // Append sorted workers to the table
+        
+                // Sort workers by name
+                workers.sort((a, b) => isAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+        
                 workers.forEach(worker => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="px-4 py-2 border-b">${worker.name}</td>
                         <td class="px-4 py-2 border-b">${worker.password}</td>
-                        <td class="px-4 py-2 border-b">${worker.department}</td> <!-- Display department -->
+                        <td class="px-4 py-2 border-b">${worker.department}</td>
                         <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}', '${worker.department}')">تعديل</button>
-                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="deleteWorker('${worker.id}')">حذف</button>
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}', '${worker.department}')">تعديل</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteWorker('${worker.id}')">حذف</button>
                         </td>
                     `;
                     workerList.appendChild(tr);
                 });
             } catch {
-                showErrorAlert('خطأ في تحميل قائمة العمال');
+                showErrorAlert('خطأ في تحميل العمال');
             }
         }
-    
-        // Toggle sorting order when the sort button is clicked
-        document.getElementById('sort-worker-list-btn').addEventListener('click', function () {
-            isAscending = !isAscending; // Toggle sort order
-            displayWorkerList(); // Refresh the list with new sort order
+        
+        // Edit worker
+        window.editWorker = function(id, name, password, department) {
+            currentWorkerId = id;
+            document.getElementById('worker-name').value = name;
+            document.getElementById('worker-password').value = password;
+            document.getElementById('worker-department').value = department;
+        };
+        
+        // Toggle sorting order
+        document.getElementById('sort-worker-list-btn').addEventListener('click', () => {
+            isAscending = !isAscending;
+            displayWorkerList();
         });
-    
-        // Delete worker function
-        window.deleteWorker = function (id) {
+        
+        // Delete worker
+        window.deleteWorker = function(id) {
             const modal = document.getElementById('confirmation-modal');
             const confirmBtn = document.getElementById('confirm-delete-btn');
             const cancelBtn = document.getElementById('cancel-delete-btn');
-    
+        
             modal.classList.remove('hidden');
-    
-            confirmBtn.onclick = async function () {
+        
+            confirmBtn.onclick = async function() {
                 try {
                     await deleteDoc(doc(db, "workers", id));
                     showSuccessAlert('تم حذف العامل بنجاح');
@@ -289,21 +325,211 @@
                     modal.classList.add('hidden');
                 }
             };
-    
-            cancelBtn.onclick = function () {
+        
+            cancelBtn.onclick = function() {
                 modal.classList.add('hidden');
             };
-        }
-    
-        // Toggle visibility of worker list
-        document.getElementById('toggle-worker-list-btn').addEventListener('click', function () {
+        };
+        
+        // Toggle worker list visibility
+        document.getElementById('toggle-worker-list-btn').addEventListener('click', () => {
             const workerListContainer = document.getElementById('worker-table-container');
             workerListContainer.classList.toggle('hidden');
-            displayWorkerList();  // Ensure this is called to refresh the list when shown
+            displayWorkerList();
         });
-    
-        // Search functionality for workers
-        document.getElementById('search-bar').addEventListener('input', function () {
+        
+        // Handle program form submission
+        document.getElementById('program-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+        
+            const programName = document.getElementById('program-name').value;
+            const programFile = document.getElementById('program-file').files[0];
+        
+            if (!programFile) {
+                showErrorAlert('يجب اختيار ملف');
+                return;
+            }
+        
+            const iqamaId = localStorage.getItem('iqamaId');
+            if (!iqamaId) {
+                showErrorAlert('لم يتم العثور على رقم الإقامة');
+                return;
+            }
+        
+            try {
+                await addDoc(collection(db, "programs"), {
+                    name: programName,
+                    file: programFile.name,
+                    iqamaId
+                });
+                showSuccessAlert('تم رفع البرنامج بنجاح');
+                document.getElementById('program-form').reset();
+                displayProgramList();
+            } catch {
+                showErrorAlert('خطأ في رفع البرنامج');
+            }
+        });
+      // Toggle Program List Visibility
+document
+  .getElementById("toggle-program-list-btn")
+  .addEventListener("click", () => {
+    const programTableContainer = document.getElementById("program-table-container");
+    programTableContainer.classList.toggle("hidden");
+
+    if (!programTableContainer.classList.contains("hidden")) {
+      // Load and display the program list when the container becomes visible
+      displayProgramList();
+    }
+  });
+
+// Display Program List
+async function displayProgramList() {
+  const programList = document.getElementById("program-list").querySelector("tbody"); // Select the tbody
+  programList.innerHTML = ""; // Clear the table body
+
+  const iqamaId = localStorage.getItem("iqamaId");
+  if (!iqamaId) {
+    showAlert("error", "لم يتم العثور على رقم الإقامة");
+    return;
+  }
+
+  try {
+    const snapshot = await getDocs(collection(db, "programs"));
+    snapshot.forEach((docSnapshot) => {
+      const program = docSnapshot.data();
+      if (program.iqamaId === iqamaId) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="px-4 py-2 border-b">${program.name}</td>
+          <td class="px-4 py-2 border-b">${program.file}</td>
+          <td class="px-4 py-2 border-b">
+            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editProgram('${docSnapshot.id}', '${program.name}', '${program.file}')">تعديل</button>
+            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteProgram('${docSnapshot.id}')">حذف</button>
+          </td>
+        `;
+        programList.appendChild(tr);
+      }
+    });
+  } catch {
+    showAlert("error", "خطأ في تحميل البرامج");
+  }
+}
+function showAlert(type, message) {
+  const alertContainer = document.getElementById('alert-container');
+  if (!alertContainer) return;
+
+  // Set alert classes based on the type
+  let alertClass;
+  if (type === 'success') {
+    alertClass = 'bg-green-500 text-white';
+  } else if (type === 'error') {
+    alertClass = 'bg-red-500 text-white';
+  } else if (type === 'info') {
+    alertClass = 'bg-blue-500 text-white';
+  } else {
+    alertClass = 'bg-gray-500 text-white';
+  }
+
+  // Create the alert element
+  const alertElement = document.createElement('div');
+  alertElement.className = `${alertClass} p-4 rounded mb-4`;
+  alertElement.textContent = message;
+
+  // Add the alert to the container
+  alertContainer.appendChild(alertElement);
+
+  // Remove the alert after 3 seconds
+  setTimeout(() => {
+    alertContainer.removeChild(alertElement);
+  }, 3000);
+}
+
+// Edit Program
+window.editProgram = function (id, name, file) {
+  // Populate the form with the selected program's data for editing
+  document.getElementById("program-name").value = name;
+
+  // Display a message if needed (e.g., file upload cannot directly populate)
+  showAlert("info", "يمكنك تحديث اسم البرنامج. لتغيير الملف، اختر ملفًا جديدًا.");
+
+  // Store the current program's ID for editing
+  document.getElementById("program-id").value = id;
+
+  // Scroll to the form (optional, for user convenience)
+  document.getElementById("program-form").scrollIntoView({ behavior: "smooth" });
+};
+
+// Handle Program Form Submission (Create or Edit)
+document.getElementById("program-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const programId = document.getElementById("program-id").value;
+  const programName = document.getElementById("program-name").value;
+  const programFile = document.getElementById("program-file").files[0];
+
+  const iqamaId = localStorage.getItem("iqamaId");
+  if (!iqamaId) {
+    showAlert("error", "لم يتم العثور على رقم الإقامة");
+    return;
+  }
+
+  try {
+    if (programId) {
+      // Update existing program
+      const programRef = doc(db, "programs", programId);
+      const updatedData = {
+        name: programName,
+        iqamaId,
+      };
+
+      if (programFile) {
+        updatedData.file = programFile.name; // Save the new file name if provided
+      }
+
+      await updateDoc(programRef, updatedData);
+      showAlert("success", "تم تحديث البرنامج بنجاح");
+    } else {
+      // Add a new program
+      if (!programFile) {
+        showAlert("error", "يجب اختيار ملف");
+        return;
+      }
+
+      await addDoc(collection(db, "programs"), {
+        name: programName,
+        file: programFile.name,
+        iqamaId,
+      });
+      showAlert("success", "تم إضافة البرنامج بنجاح");
+    }
+
+    // Clear the form
+    document.getElementById("program-form").reset();
+    document.getElementById("program-id").value = "";
+    displayProgramList();
+  } catch (error) {
+    showAlert("error", "خطأ في معالجة البرنامج");
+    console.error(error);
+  }
+});
+
+// Delete Program
+window.deleteProgram = async function (id) {
+  const confirmation = confirm("هل أنت متأكد أنك تريد حذف هذا البرنامج؟");
+  if (!confirmation) return;
+
+  try {
+    const programRef = doc(db, "programs", id);
+    await deleteDoc(programRef);
+    showAlert("success", "تم حذف البرنامج بنجاح");
+    displayProgramList();
+  } catch (error) {
+    showAlert("error", "خطأ في حذف البرنامج");
+    console.error(error);
+  }
+};
+  // Search functionality for workers
+  document.getElementById('search-bar').addEventListener('input', function () {
             const searchQuery = this.value.toLowerCase();
             const rows = document.querySelectorAll('#worker-list tr');
     
@@ -319,6 +545,11 @@
                 }
             });
         });
-    </script>
+
+
+        displayWorkerList();
+        displayProgramList();
+        </script>
+        
 </body>
-</html>    
+</html>
