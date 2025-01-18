@@ -354,7 +354,7 @@
 
 
         
-     // Handle program form submission
+  // Handle program form submission
 document.getElementById('program-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -373,19 +373,33 @@ document.getElementById('program-form').addEventListener('submit', async (e) => 
         return;
     }
 
-    try {
-        await addDoc(collection(db, "programs"), {
-            name: programName,
-            file: programFile.name,
-            department, // Save the department
-            iqamaId
-        });
-        showSuccessAlert('تم رفع البرنامج بنجاح');
-        document.getElementById('program-form').reset();
-        displayProgramList();
-    } catch {
-        showErrorAlert('خطأ في رفع البرنامج');
-    }
+    // Convert the PDF file to base64
+    const reader = new FileReader();
+    reader.readAsDataURL(programFile);
+
+    reader.onloadend = async () => {
+        const base64Pdf = reader.result.split(',')[1]; // Extract the base64 string (remove the data URL part)
+
+        try {
+            // Save the base64 string of the PDF to Firestore
+            await addDoc(collection(db, "programs"), {
+                name: programName,
+                file: base64Pdf, // Save base64 string
+                department, // Save the department
+                iqamaId
+            });
+
+            showSuccessAlert('تم رفع البرنامج بنجاح');
+            document.getElementById('program-form').reset();
+            displayProgramList();
+        } catch {
+            showErrorAlert('خطأ في رفع البرنامج');
+        }
+    };
+
+    reader.onerror = () => {
+        showErrorAlert('فشل تحويل الملف إلى Base64');
+    };
 });
 
       // Toggle Program List Visibility
