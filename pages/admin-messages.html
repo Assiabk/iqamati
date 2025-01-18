@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسائل الإدارة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <!-- Main Form Container -->
+    <div class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
+        <h1 class="text-3xl font-extrabold text-center text-orange-600 mb-6">إرسال رسالة للعمال</h1>
+        <form id="messageForm" class="space-y-6">
+            <!-- Department Selection -->
+            <div>
+                <label for="department" class="block text-sm font-medium text-gray-700">القسم</label>
+                <select id="department" class="mt-2 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" required>
+                    <option value="" disabled selected>اختر القسم</option>
+                    <option value="الإدارة">الإدارة</option>
+                    <option value="الإيواء">الإيواء</option>
+                    <option value="الإطعام">الإطعام</option>
+                    <option value="المتابعة الصحية">المتابعة الصحية</option>
+                    <option value="الانشطة الثقافية و الرياضية">الانشطة الثقافية و الرياضية</option>
+                    <option value="الصيانة">الصيانة</option>
+                    <option value="الأمن">الأمن</option>
+                    <option value="التنظيف">التنظيف</option>
+                </select>
+            </div>
+            <!-- Message Text -->
+            <div>
+                <label for="message" class="block text-sm font-medium text-gray-700">نص الرسالة</label>
+                <textarea id="message" rows="5" class="mt-2 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" placeholder="اكتب رسالتك هنا..." required></textarea>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-orange-500 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-orange-600 transition">إرسال الرسالة</button>
+        </form>
+    </div>
+
+    <!-- Modal for Alerts -->
+    <div id="modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 id="modalTitle" class="text-xl font-bold text-center mb-4"></h2>
+            <p id="modalMessage" class="text-center text-gray-600"></p>
+            <button id="modalClose" class="mt-4 w-full bg-orange-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-orange-600 transition">إغلاق</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+            authDomain: "iqamatisite.firebaseapp.com",
+            projectId: "iqamatisite",
+            storageBucket: "iqamatisite.appspot.com",
+            messagingSenderId: "240286199373",
+            appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
+
+        // Import Firebase Modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Form and Modal Elements
+        const form = document.getElementById("messageForm");
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalMessage = document.getElementById("modalMessage");
+        const modalClose = document.getElementById("modalClose");
+
+        // Show Modal Function
+        const showModal = (title, message, isSuccess) => {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalTitle.className = isSuccess
+                ? "text-green-600 font-bold text-xl text-center mb-4"
+                : "text-red-600 font-bold text-xl text-center mb-4";
+            modal.classList.remove("hidden");
+        };
+
+        // Close Modal
+        modalClose.addEventListener("click", () => {
+            modal.classList.add("hidden");
+        });
+
+        // Handle Form Submission
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const department = document.getElementById("department").value;
+            const messageText = document.getElementById("message").value;
+
+            try {
+                // Save to Firestore
+                await addDoc(collection(db, "departmentMessages"), {
+                    department: department,
+                    message: messageText,
+                    timestamp: new Date()
+                });
+
+                // Success Modal
+                showModal("تم الإرسال بنجاح", "تم إرسال الرسالة إلى القسم المحدد بنجاح.", true);
+                form.reset();
+            } catch (error) {
+                console.error("Error saving message: ", error);
+                // Error Modal
+                showModal("خطأ في الإرسال", "حدث خطأ أثناء محاولة إرسال الرسالة. حاول مرة أخرى.", false);
+            }
+        });
+    </script>
+</body>
+</html>
