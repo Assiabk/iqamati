@@ -180,7 +180,7 @@
             messagingSenderId: "240286199373",
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
-        
+    
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -351,88 +351,111 @@
             workerListContainer.classList.toggle('hidden');
             displayWorkerList();
         });
-
-
+    
+        // Program form submission handler
+        document.getElementById('program-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
         
-     // Handle program form submission
-document.getElementById('program-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const programName = document.getElementById('program-name').value;
-    const programFile = document.getElementById('program-file').files[0];
-    const department = document.getElementById('department').value; // Get the selected department
-
-    if (!programFile) {
-        showErrorAlert('يجب اختيار ملف');
-        return;
-    }
-
-    const iqamaId = localStorage.getItem('iqamaId');
-    if (!iqamaId) {
-        showErrorAlert('لم يتم العثور على رقم الإقامة');
-        return;
-    }
-
-    try {
-        await addDoc(collection(db, "programs"), {
-            name: programName,
-            file: programFile.name,
-            department, // Save the department
-            iqamaId
-        });
-        showSuccessAlert('تم رفع البرنامج بنجاح');
-        document.getElementById('program-form').reset();
-        displayProgramList();
-    } catch {
-        showErrorAlert('خطأ في رفع البرنامج');
-    }
-});
-
-      // Toggle Program List Visibility
-      document
-  .getElementById("toggle-program-list-btn")
-  .addEventListener("click", () => {
-    const programTableContainer = document.getElementById("program-table-container");
-    programTableContainer.classList.toggle("hidden");
-
-    if (!programTableContainer.classList.contains("hidden")) {
-      // Load and display the program list when the container becomes visible
-      displayProgramList();
-    }
-  });
-// Display Program List
-async function displayProgramList() {
-    const programList = document.getElementById("program-list").querySelector("tbody"); // Select the tbody
-    programList.innerHTML = ""; // Clear the table body
-
-    const iqamaId = localStorage.getItem("iqamaId");
-    if (!iqamaId) {
-        showAlert("error", "لم يتم العثور على رقم الإقامة");
-        return;
-    }
-
-    try {
-        const snapshot = await getDocs(collection(db, "programs"));
-        snapshot.forEach((docSnapshot) => {
-            const program = docSnapshot.data();
-            if (program.iqamaId === iqamaId) {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td class="px-4 py-2 border-b">${program.name}</td>
-                    <td class="px-4 py-2 border-b">${program.department || "غير محدد"}</td> <!-- Add department -->
-                    <td class="px-4 py-2 border-b">${program.file}</td>
-                    <td class="px-4 py-2 border-b">
-                        <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editProgram('${docSnapshot.id}', '${program.name}', '${program.file}', '${program.department}')">تعديل</button>
-                        <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteProgram('${docSnapshot.id}')">حذف</button>
-                    </td>
-                `;
-                programList.appendChild(tr);
+            const programName = document.getElementById('program-name').value;
+            const programFile = document.getElementById('program-file').files[0];
+            const department = document.getElementById('department').value;
+        
+            if (!programFile) {
+                showErrorAlert('يجب اختيار ملف');
+                return;
+            }
+        
+            const iqamaId = localStorage.getItem('iqamaId');
+            if (!iqamaId) {
+                showErrorAlert('لم يتم العثور على رقم الإقامة');
+                return;
+            }
+        
+            try {
+                // Convert the PDF file to base64 string
+                const base64EncodedPdf = await fileToBase64(programFile);
+        
+                // Save to Firestore
+                await addDoc(collection(db, "programs"), {
+                    name: programName,
+                    file: base64EncodedPdf,  // Save the base64 encoded PDF content
+                    department, // Save the department
+                    iqamaId
+                });
+                showSuccessAlert('تم رفع البرنامج بنجاح');
+                document.getElementById('program-form').reset();
+                displayProgramList();
+            } catch (error) {
+                showErrorAlert('خطأ في رفع البرنامج');
+                console.error('Error uploading program:', error);
             }
         });
-    } catch {
-        showAlert("error", "خطأ في تحميل البرامج");
-    }
-}
+    
+        // Function to convert the file to base64 string
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]); // Remove data URI part
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    
+        // Toggle Program List Visibility
+        document.getElementById("toggle-program-list-btn").addEventListener("click", () => {
+            const programTableContainer = document.getElementById("program-table-container");
+            programTableContainer.classList.toggle("hidden");
+    
+            if (!programTableContainer.classList.contains("hidden")) {
+                // Load and display the program list when the container becomes visible
+                displayProgramList();
+            }
+        });
+    
+        // Display Program List
+        async function displayProgramList() {
+            const programList = document.getElementById("program-list").querySelector("tbody"); // Select the tbody
+            programList.innerHTML = ""; // Clear the table body
+    
+            const iqamaId = localStorage.getItem("iqamaId");
+            if (!iqamaId) {
+                showAlert("error", "لم يتم العثور على رقم الإقامة");
+                return;
+            }
+    
+            try {
+                const snapshot = await getDocs(collection(db, "programs"));
+                const programs = [];
+                snapshot.forEach(docSnapshot => {
+                    const program = docSnapshot.data();
+                    if (program.iqamaId === iqamaId) {
+                        programs.push({
+                            id: docSnapshot.id,
+                            name: program.name,
+                            department: program.department,
+                        });
+                    }
+                });
+    
+                // Display the programs
+                programs.forEach(program => {
+                    const tr = document.createElement("tr");
+    
+                    tr.innerHTML = `
+                        <td class="px-4 py-2 border-b">${program.name}</td>
+                        <td class="px-4 py-2 border-b">${program.department}</td>
+                        <td class="px-4 py-2 border-b">
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editProgram('${program.id}', '${program.name}', '${program.department}')">تعديل</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteProgram('${program.id}')">حذف</button>
+                        </td>
+                    `;
+    
+                    programList.appendChild(tr);
+                });
+            } catch {
+                showErrorAlert("خطأ في تحميل البرامج");
+            }
+        }
 
 // Edit Program
 window.editProgram = function (id, name, file, department) {
