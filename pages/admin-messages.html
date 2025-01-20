@@ -9,12 +9,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
     <!-- Main Form Container -->
-    <div class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
+    <div class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg mb-6">
         <h1 class="text-3xl font-extrabold text-center text-orange-600 mb-6">إرسال رسالة للعمال</h1>
         <form id="messageForm" class="space-y-6">
-            <!-- Department Selection -->
             <div>
                 <label for="department" class="block text-sm font-medium text-gray-700">القسم</label>
                 <select id="department" class="mt-2 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" required>
@@ -23,28 +22,61 @@
                     <option value="الإيواء">الإيواء</option>
                     <option value="الإطعام">الإطعام</option>
                     <option value="المتابعة الصحية">المتابعة الصحية</option>
-                    <option value="الانشطة الثقافية و الرياضية">الانشطة الثقافية و الرياضية</option>
+                    <option value="الأنشطة الثقافية و الرياضية">الأنشطة الثقافية و الرياضية</option>
                     <option value="الصيانة">الصيانة</option>
                     <option value="الأمن">الأمن</option>
                     <option value="التنظيف">التنظيف</option>
                 </select>
             </div>
-            <!-- Message Text -->
             <div>
                 <label for="message" class="block text-sm font-medium text-gray-700">نص الرسالة</label>
                 <textarea id="message" rows="5" class="mt-2 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" placeholder="اكتب رسالتك هنا..." required></textarea>
             </div>
-            <!-- Submit Button -->
-            <button type="submit" class="w-full bg-orange-500 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-orange-600 transition">إرسال الرسالة</button>
+            <button type="submit" class="w-full bg-orange-500 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-orange-600 transition">إرسال</button>
         </form>
     </div>
 
-    <!-- Modal for Alerts -->
-    <div id="modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h2 id="modalTitle" class="text-xl font-bold text-center mb-4"></h2>
-            <p id="modalMessage" class="text-center text-gray-600"></p>
-            <button id="modalClose" class="mt-4 w-full bg-orange-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-orange-600 transition">إغلاق</button>
+    <!-- Messages Table -->
+    <div class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-orange-600 mb-4">الرسائل المرسلة</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse border border-gray-300 text-sm">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="border border-gray-300 px-4 py-2">القسم</th>
+                        <th class="border border-gray-300 px-4 py-2">نص الرسالة</th>
+                        <th class="border border-gray-300 px-4 py-2">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="messagesTable" class="text-center"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">تعديل الرسالة</h3>
+            <div>
+                <label for="editMessage" class="block text-sm font-medium text-gray-700">نص الرسالة</label>
+                <textarea id="editMessage" rows="5" class="mt-2 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"></textarea>
+            </div>
+            <div class="flex justify-end mt-6 space-x-2">
+                <button id="cancelEditBtn" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition">إلغاء</button>
+                <button id="confirmEditBtn" class="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 transition">تحديث</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">تأكيد الحذف</h3>
+            <p class="text-gray-700">هل أنت متأكد أنك تريد حذف هذه الرسالة؟</p>
+            <div class="flex justify-end mt-6 space-x-2">
+                <button id="cancelDeleteBtn" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition">إلغاء</button>
+                <button id="confirmDeleteBtn" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition">تأكيد الحذف</button>
+            </div>
         </div>
     </div>
 
@@ -61,58 +93,92 @@
 
         // Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Form and Modal Elements
-        const form = document.getElementById("messageForm");
-        const modal = document.getElementById("modal");
-        const modalTitle = document.getElementById("modalTitle");
-        const modalMessage = document.getElementById("modalMessage");
-        const modalClose = document.getElementById("modalClose");
+        const messagesTable = document.getElementById("messagesTable");
+        const editModal = document.getElementById("editModal");
+        const confirmationModal = document.getElementById("confirmationModal");
 
-        // Show Modal Function
-        const showModal = (title, message, isSuccess) => {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalTitle.className = isSuccess
-                ? "text-green-600 font-bold text-xl text-center mb-4"
-                : "text-red-600 font-bold text-xl text-center mb-4";
-            modal.classList.remove("hidden");
+        const editMessageInput = document.getElementById("editMessage");
+        const confirmEditBtn = document.getElementById("confirmEditBtn");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        let currentEditId = null;
+        let currentDeleteId = null;
+
+        // Fetch and Render Messages
+        const fetchMessages = async () => {
+            messagesTable.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "departmentMessages"));
+            querySnapshot.forEach(doc => {
+                const { department, message } = doc.data();
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td class="border px-4 py-2">${department}</td>
+                    <td class="border px-4 py-2">${message}</td>
+                    <td class="border px-4 py-2">
+                        <button class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" data-id="${doc.id}" data-message="${message}">تعديل</button>
+                        <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-id="${doc.id}">حذف</button>
+                    </td>
+                `;
+                messagesTable.appendChild(row);
+            });
         };
 
-        // Close Modal
-        modalClose.addEventListener("click", () => {
-            modal.classList.add("hidden");
+        // Add New Message
+        document.getElementById("messageForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const department = document.getElementById("department").value;
+            const message = document.getElementById("message").value;
+
+            await addDoc(collection(db, "departmentMessages"), { department, message });
+            e.target.reset();
+            fetchMessages();
         });
 
-        // Handle Form Submission
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const department = document.getElementById("department").value;
-            const messageText = document.getElementById("message").value;
-
-            try {
-                // Save to Firestore
-                await addDoc(collection(db, "departmentMessages"), {
-                    department: department,
-                    message: messageText,
-                    timestamp: new Date()
-                });
-
-                // Success Modal
-                showModal("تم الإرسال بنجاح", "تم إرسال الرسالة إلى القسم المحدد بنجاح.", true);
-                form.reset();
-            } catch (error) {
-                console.error("Error saving message: ", error);
-                // Error Modal
-                showModal("خطأ في الإرسال", "حدث خطأ أثناء محاولة إرسال الرسالة. حاول مرة أخرى.", false);
+        // Edit Message
+        messagesTable.addEventListener("click", (e) => {
+            if (e.target.classList.contains("edit-btn")) {
+                currentEditId = e.target.dataset.id;
+                editMessageInput.value = e.target.dataset.message;
+                editModal.classList.remove("hidden");
             }
         });
+
+        confirmEditBtn.addEventListener("click", async () => {
+            const updatedMessage = editMessageInput.value;
+            await updateDoc(doc(db, "departmentMessages", currentEditId), { message: updatedMessage });
+            editModal.classList.add("hidden");
+            fetchMessages();
+        });
+
+        document.getElementById("cancelEditBtn").addEventListener("click", () => {
+            editModal.classList.add("hidden");
+        });
+
+        // Delete Message
+        messagesTable.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete-btn")) {
+                currentDeleteId = e.target.dataset.id;
+                confirmationModal.classList.remove("hidden");
+            }
+        });
+
+        confirmDeleteBtn.addEventListener("click", async () => {
+            await deleteDoc(doc(db, "departmentMessages", currentDeleteId));
+            confirmationModal.classList.add("hidden");
+            fetchMessages();
+        });
+
+        document.getElementById("cancelDeleteBtn").addEventListener("click", () => {
+            confirmationModal.classList.add("hidden");
+        });
+
+        // Fetch Messages on Load
+        fetchMessages();
     </script>
 </body>
 </html>
