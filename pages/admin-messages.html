@@ -45,6 +45,7 @@
                     <tr>
                         <th class="border border-gray-300 px-4 py-2">القسم</th>
                         <th class="border border-gray-300 px-4 py-2">نص الرسالة</th>
+                        <th class="border border-gray-300 px-4 py-2">التاريخ</th>
                         <th class="border border-gray-300 px-4 py-2">الإجراءات</th>
                     </tr>
                 </thead>
@@ -93,7 +94,7 @@
 
         // Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -114,12 +115,15 @@
             onSnapshot(messagesRef, (snapshot) => {
                 messagesTable.innerHTML = ""; // Clear current table rows
                 snapshot.forEach(doc => {
-                    const { department, message } = doc.data();
+                    const { department, message, timestamp } = doc.data();
                     const row = document.createElement("tr");
+
+                    const formattedDate = new Date(timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
 
                     row.innerHTML = `
                         <td class="border px-4 py-2">${department}</td>
                         <td class="border px-4 py-2">${message}</td>
+                        <td class="border px-4 py-2">${formattedDate}</td>
                         <td class="border px-4 py-2">
                             <button class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" data-id="${doc.id}" data-message="${message}">تعديل</button>
                             <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-id="${doc.id}">حذف</button>
@@ -136,7 +140,11 @@
             const department = document.getElementById("department").value;
             const message = document.getElementById("message").value;
 
-            await addDoc(collection(db, "departmentMessages"), { department, message });
+            await addDoc(collection(db, "departmentMessages"), { 
+                department, 
+                message,
+                timestamp: serverTimestamp() // Add timestamp
+            });
             e.target.reset();
         });
 
