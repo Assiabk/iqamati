@@ -93,7 +93,7 @@
 
         // Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -108,23 +108,25 @@
         let currentEditId = null;
         let currentDeleteId = null;
 
-        // Fetch and Render Messages
-        const fetchMessages = async () => {
-            messagesTable.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "departmentMessages"));
-            querySnapshot.forEach(doc => {
-                const { department, message } = doc.data();
-                const row = document.createElement("tr");
+        // Real-time listener to fetch messages
+        const fetchMessagesRealTime = () => {
+            const messagesRef = collection(db, "departmentMessages");
+            onSnapshot(messagesRef, (snapshot) => {
+                messagesTable.innerHTML = ""; // Clear current table rows
+                snapshot.forEach(doc => {
+                    const { department, message } = doc.data();
+                    const row = document.createElement("tr");
 
-                row.innerHTML = `
-                    <td class="border px-4 py-2">${department}</td>
-                    <td class="border px-4 py-2">${message}</td>
-                    <td class="border px-4 py-2">
-                        <button class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" data-id="${doc.id}" data-message="${message}">تعديل</button>
-                        <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-id="${doc.id}">حذف</button>
-                    </td>
-                `;
-                messagesTable.appendChild(row);
+                    row.innerHTML = `
+                        <td class="border px-4 py-2">${department}</td>
+                        <td class="border px-4 py-2">${message}</td>
+                        <td class="border px-4 py-2">
+                            <button class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" data-id="${doc.id}" data-message="${message}">تعديل</button>
+                            <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-id="${doc.id}">حذف</button>
+                        </td>
+                    `;
+                    messagesTable.appendChild(row);
+                });
             });
         };
 
@@ -136,7 +138,6 @@
 
             await addDoc(collection(db, "departmentMessages"), { department, message });
             e.target.reset();
-            fetchMessages();
         });
 
         // Edit Message
@@ -152,7 +153,6 @@
             const updatedMessage = editMessageInput.value;
             await updateDoc(doc(db, "departmentMessages", currentEditId), { message: updatedMessage });
             editModal.classList.add("hidden");
-            fetchMessages();
         });
 
         document.getElementById("cancelEditBtn").addEventListener("click", () => {
@@ -170,15 +170,14 @@
         confirmDeleteBtn.addEventListener("click", async () => {
             await deleteDoc(doc(db, "departmentMessages", currentDeleteId));
             confirmationModal.classList.add("hidden");
-            fetchMessages();
         });
 
         document.getElementById("cancelDeleteBtn").addEventListener("click", () => {
             confirmationModal.classList.add("hidden");
         });
 
-        // Fetch Messages on Load
-        fetchMessages();
+        // Fetch Messages Real-Time
+        fetchMessagesRealTime();
     </script>
 </body>
 </html>
