@@ -171,7 +171,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         
-        // Firebase configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -180,92 +180,83 @@
             messagingSenderId: "240286199373",
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
-    
+        
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Global variables
-        let currentWorkerId = null;
-        let isAscending = true; // Sort order (ascending/descending)
+        // Global State
+        let currentEditId = null; // Used for editing both workers and programs
+        let isWorkerListAscending = true;
         
-        // Handle worker form submission
-        document.getElementById('worker-form').addEventListener('submit', async (e) => {
+        // Utility Functions
+        const showAlert = (type, message) => {
+            const alertElement = document.getElementById(`${type}-alert`);
+            if (!alertElement) return;
+            alertElement.textContent = message;
+            alertElement.classList.remove('hidden');
+            setTimeout(() => alertElement.classList.add('hidden'), 3000);
+        };
+        
+        const clearForm = (formId) => {
+            document.getElementById(formId).reset();
+            currentEditId = null;
+        };
+        
+        // Worker Management
+        const handleWorkerFormSubmit = async (e) => {
             e.preventDefault();
         
             const name = document.getElementById('worker-name').value;
             const password = document.getElementById('worker-password').value;
             const department = document.getElementById('worker-department').value;
+            const iqamaId = localStorage.getItem('iqamaId');
+        
+            if (!iqamaId) {
+                showAlert('error', 'لم يتم العثور على رقم الإقامة');
+                return;
+            }
         
             if (password.length < 8) {
-                showErrorAlert('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل');
-                return;
-            }
-        
-            const iqamaId = localStorage.getItem('iqamaId');
-            if (!iqamaId) {
-                showErrorAlert('لم يتم العثور على رقم الإقامة');
-                return;
-            }
-        
-            const workerQuery = query(collection(db, "workers"), where("name", "==", name));
-            const querySnapshot = await getDocs(workerQuery);
-        
-            if (!querySnapshot.empty && currentWorkerId === null) {
-                showErrorAlert('اسم العامل موجود بالفعل');
+                showAlert('error', 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل');
                 return;
             }
         
             try {
-                if (currentWorkerId) {
+                const workerData = { name, password, department, iqamaId };
+        
+                if (currentEditId) {
                     // Update worker
-                    await updateDoc(doc(db, "workers", currentWorkerId), {
-                        name, password, department, iqamaId
-                    });
-                    showSuccessAlert('تم تحديث بيانات العامل بنجاح');
-                    currentWorkerId = null;
+                    await updateDoc(doc(db, "workers", currentEditId), workerData);
+                    showAlert('success', 'تم تحديث بيانات العامل بنجاح');
                 } else {
                     // Add new worker
-                    await addDoc(collection(db, "workers"), {
-                        name, password, department, iqamaId
-                    });
-                    showSuccessAlert('تم إضافة العامل بنجاح');
+                    const existingWorkerQuery = query(collection(db, "workers"), where("name", "==", name));
+                    const querySnapshot = await getDocs(existingWorkerQuery);
+        
+                    if (!querySnapshot.empty) {
+                        showAlert('error', 'اسم العامل موجود بالفعل');
+                        return;
+                    }
+                    await addDoc(collection(db, "workers"), workerData);
+                    showAlert('success', 'تم إضافة العامل بنجاح');
                 }
-            } catch {
-                showErrorAlert('خطأ في معالجة البيانات');
+        
+                clearForm('worker-form');
+                displayWorkerList();
+            } catch (error) {
+                console.error(error);
+                showAlert('error', 'خطأ في معالجة البيانات');
             }
+        };
         
-            // Clear form
-            document.getElementById('worker-name').value = '';
-            document.getElementById('worker-password').value = '';
-            document.getElementById('worker-department').value = '';
-            displayWorkerList();
-        });
-        
-        // Show success alert
-        function showSuccessAlert(message) {
-            const alert = document.getElementById('success-alert');
-            alert.textContent = message;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
-        
-        // Show error alert
-        function showErrorAlert(message) {
-            const alert = document.getElementById('error-alert');
-            alert.textContent = message;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
-        
-        // Display worker list
-        async function displayWorkerList() {
+        const displayWorkerList = async () => {
             const workerList = document.getElementById('worker-list');
             workerList.innerHTML = '';
-        
             const iqamaId = localStorage.getItem('iqamaId');
+        
             if (!iqamaId) {
-                showErrorAlert('لم يتم العثور على رقم الإقامة');
+                showAlert('error', 'لم يتم العثور على رقم الإقامة');
                 return;
             }
         
@@ -276,295 +267,148 @@
                 snapshot.forEach(docSnapshot => {
                     const worker = docSnapshot.data();
                     if (worker.iqamaId === iqamaId) {
-                        workers.push({
-                            id: docSnapshot.id,
-                            name: worker.name,
-                            password: worker.password,
-                            department: worker.department
-                        });
+                        workers.push({ id: docSnapshot.id, ...worker });
                     }
                 });
         
-                // Sort workers by name
-                workers.sort((a, b) => isAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+                workers.sort((a, b) => isWorkerListAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
         
                 workers.forEach(worker => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="px-4 py-2 border-b">${worker.name}</td>
-                        <td class="px-4 py-2 border-b">${worker.password}</td>
-                        <td class="px-4 py-2 border-b">${worker.department}</td>
-                        <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}', '${worker.department}')">تعديل</button>
-                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteWorker('${worker.id}')">حذف</button>
-                        </td>
-                    `;
-                    workerList.appendChild(tr);
+                    const row = `
+                        <tr>
+                            <td>${worker.name}</td>
+                            <td>${worker.password}</td>
+                            <td>${worker.department}</td>
+                            <td>
+                                <button onclick="editWorker('${worker.id}', '${worker.name}', '${worker.password}', '${worker.department}')">تعديل</button>
+                                <button onclick="deleteWorker('${worker.id}')">حذف</button>
+                            </td>
+                        </tr>`;
+                    workerList.innerHTML += row;
                 });
-            } catch {
-                showErrorAlert('خطأ في تحميل العمال');
+            } catch (error) {
+                console.error(error);
+                showAlert('error', 'خطأ في تحميل العمال');
             }
-        }
+        };
         
-        // Edit worker
-        window.editWorker = function(id, name, password, department) {
-            currentWorkerId = id;
+        const editWorker = (id, name, password, department) => {
+            currentEditId = id;
             document.getElementById('worker-name').value = name;
             document.getElementById('worker-password').value = password;
             document.getElementById('worker-department').value = department;
         };
         
-        // Toggle sorting order
-        document.getElementById('sort-worker-list-btn').addEventListener('click', () => {
-            isAscending = !isAscending;
-            displayWorkerList();
-        });
+        const deleteWorker = async (id) => {
+            if (!confirm('هل أنت متأكد أنك تريد حذف هذا العامل؟')) return;
         
-        // Delete worker
-        window.deleteWorker = function(id) {
-            const modal = document.getElementById('confirmation-modal');
-            const confirmBtn = document.getElementById('confirm-delete-btn');
-            const cancelBtn = document.getElementById('cancel-delete-btn');
-        
-            modal.classList.remove('hidden');
-        
-            confirmBtn.onclick = async function() {
-                try {
-                    await deleteDoc(doc(db, "workers", id));
-                    showSuccessAlert('تم حذف العامل بنجاح');
-                    modal.classList.add('hidden');
-                    displayWorkerList();
-                } catch {
-                    showErrorAlert('خطأ في حذف العامل');
-                    modal.classList.add('hidden');
-                }
-            };
-        
-            cancelBtn.onclick = function() {
-                modal.classList.add('hidden');
-            };
+            try {
+                await deleteDoc(doc(db, "workers", id));
+                showAlert('success', 'تم حذف العامل بنجاح');
+                displayWorkerList();
+            } catch (error) {
+                console.error(error);
+                showAlert('error', 'خطأ في حذف العامل');
+            }
         };
         
-        // Toggle worker list visibility
-        document.getElementById('toggle-worker-list-btn').addEventListener('click', () => {
-            const workerListContainer = document.getElementById('worker-table-container');
-            workerListContainer.classList.toggle('hidden');
-            displayWorkerList();
-        });
-    
-        // Program form submission handler
-        document.getElementById('program-form').addEventListener('submit', async (e) => {
+        // Program Management
+        const handleProgramFormSubmit = async (e) => {
             e.preventDefault();
         
             const programName = document.getElementById('program-name').value;
             const programFile = document.getElementById('program-file').files[0];
             const department = document.getElementById('department').value;
+            const iqamaId = localStorage.getItem('iqamaId');
         
-            if (!programFile) {
-                showErrorAlert('يجب اختيار ملف');
+            if (!iqamaId) {
+                showAlert('error', 'لم يتم العثور على رقم الإقامة');
                 return;
             }
         
-            const iqamaId = localStorage.getItem('iqamaId');
-            if (!iqamaId) {
-                showErrorAlert('لم يتم العثور على رقم الإقامة');
+            if (!programFile && !currentEditId) {
+                showAlert('error', 'يجب اختيار ملف');
                 return;
             }
         
             try {
-                // Convert the PDF file to base64 string
-                const base64EncodedPdf = await fileToBase64(programFile);
+                let programData = { name: programName, department, iqamaId };
         
-                // Save to Firestore
-                await addDoc(collection(db, "programs"), {
-                    name: programName,
-                    file: base64EncodedPdf,  // Save the base64 encoded PDF content
-                    department, // Save the department
-                    iqamaId
-                });
-                showSuccessAlert('تم رفع البرنامج بنجاح');
-                document.getElementById('program-form').reset();
-                displayProgramList();
+                if (programFile) {
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        programData.file = reader.result.split(',')[1];
+                        await saveOrUpdateProgram(programData);
+                    };
+                    reader.onerror = () => showAlert('error', 'فشل تحويل الملف إلى Base64');
+                    reader.readAsDataURL(programFile);
+                } else {
+                    await saveOrUpdateProgram(programData);
+                }
             } catch (error) {
-                showErrorAlert('خطأ في رفع البرنامج');
-                console.error('Error uploading program:', error);
+                console.error(error);
+                showAlert('error', 'خطأ في معالجة البرنامج');
             }
-        });
-    
-        // Function to convert the file to base64 string
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]); // Remove data URI part
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-    
-        // Toggle Program List Visibility
-        document.getElementById("toggle-program-list-btn").addEventListener("click", () => {
-            const programTableContainer = document.getElementById("program-table-container");
-            programTableContainer.classList.toggle("hidden");
-    
-            if (!programTableContainer.classList.contains("hidden")) {
-                // Load and display the program list when the container becomes visible
-                displayProgramList();
+        };
+        
+        const saveOrUpdateProgram = async (programData) => {
+            if (currentEditId) {
+                await updateDoc(doc(db, "programs", currentEditId), programData);
+                showAlert('success', 'تم تحديث البرنامج بنجاح');
+            } else {
+                await addDoc(collection(db, "programs"), programData);
+                showAlert('success', 'تم إضافة البرنامج بنجاح');
             }
-        });
-    
-        // Display Program List
-        async function displayProgramList() {
-            const programList = document.getElementById("program-list").querySelector("tbody"); // Select the tbody
-            programList.innerHTML = ""; // Clear the table body
-    
-            const iqamaId = localStorage.getItem("iqamaId");
+        
+            clearForm('program-form');
+            displayProgramList();
+        };
+        
+        const displayProgramList = async () => {
+            const programList = document.getElementById('program-list').querySelector('tbody');
+            programList.innerHTML = '';
+            const iqamaId = localStorage.getItem('iqamaId');
+        
             if (!iqamaId) {
-                showAlert("error", "لم يتم العثور على رقم الإقامة");
+                showAlert('error', 'لم يتم العثور على رقم الإقامة');
                 return;
             }
-    
+        
             try {
                 const snapshot = await getDocs(collection(db, "programs"));
-                const programs = [];
                 snapshot.forEach(docSnapshot => {
                     const program = docSnapshot.data();
                     if (program.iqamaId === iqamaId) {
-                        programs.push({
-                            id: docSnapshot.id,
-                            name: program.name,
-                            department: program.department,
-                        });
+                        const row = `
+                            <tr>
+                                <td>${program.name}</td>
+                                <td>${program.department || 'غير محدد'}</td>
+                                <td><button onclick="downloadFile('${program.file}')">تحميل</button></td>
+                                <td>
+                                    <button onclick="editProgram('${docSnapshot.id}', '${program.name}', '${program.department}')">تعديل</button>
+                                    <button onclick="deleteProgram('${docSnapshot.id}')">حذف</button>
+                                </td>
+                            </tr>`;
+                        programList.innerHTML += row;
                     }
                 });
-    
-                // Display the programs
-                programs.forEach(program => {
-                    const tr = document.createElement("tr");
-    
-                    tr.innerHTML = `
-                        <td class="px-4 py-2 border-b">${program.name}</td>
-                        <td class="px-4 py-2 border-b">${program.department}</td>
-                        <td class="px-4 py-2 border-b">
-                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg" onclick="editProgram('${program.id}', '${program.name}', '${program.department}')">تعديل</button>
-                            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="deleteProgram('${program.id}')">حذف</button>
-                        </td>
-                    `;
-    
-                    programList.appendChild(tr);
-                });
-            } catch {
-                showErrorAlert("خطأ في تحميل البرامج");
+            } catch (error) {
+                console.error(error);
+                showAlert('error', 'خطأ في تحميل البرامج');
             }
-        }
-
-// Edit Program
-window.editProgram = function (id, name, file, department) {
-    // Populate the form with the selected program's data for editing
-    document.getElementById("program-name").value = name;
-    document.getElementById("department").value = department || ""; // Set department in the dropdown
-
-    // Display a message if needed (e.g., file upload cannot directly populate)
-    showAlert("info", "يمكنك تحديث اسم البرنامج. لتغيير الملف، اختر ملفًا جديدًا.");
-
-    // Store the current program's ID for editing
-    document.getElementById("program-id").value = id;
-
-    // Scroll to the form (optional, for user convenience)
-    document.getElementById("program-form").scrollIntoView({ behavior: "smooth" });
-};
-
-// Handle Program Form Submission (Create or Edit)
-document.getElementById("program-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const programId = document.getElementById("program-id").value;
-    const programName = document.getElementById("program-name").value;
-    const programFile = document.getElementById("program-file").files[0];
-    const department = document.getElementById("department").value; // Get the selected department
-
-    const iqamaId = localStorage.getItem("iqamaId");
-    if (!iqamaId) {
-        showAlert("error", "لم يتم العثور على رقم الإقامة");
-        return;
-    }
-
-    try {
-        if (programId) {
-            // Update existing program
-            const programRef = doc(db, "programs", programId);
-            const updatedData = {
-                name: programName,
-                department, // Update department
-                iqamaId,
-            };
-
-            if (programFile) {
-                updatedData.file = programFile.name; // Save the new file name if provided
-            }
-
-            await updateDoc(programRef, updatedData);
-            showAlert("success", "تم تحديث البرنامج بنجاح");
-        } else {
-            // Add a new program
-            if (!programFile) {
-                showAlert("error", "يجب اختيار ملف");
-                return;
-            }
-
-            await addDoc(collection(db, "programs"), {
-                name: programName,
-                file: programFile.name,
-                department, // Add department
-                iqamaId,
-            });
-            showAlert("success", "تم إضافة البرنامج بنجاح");
-        }
-
-        // Clear the form
-        document.getElementById("program-form").reset();
-        document.getElementById("program-id").value = "";
-        displayProgramList();
-    } catch (error) {
-        showAlert("error", "خطأ في معالجة البرنامج");
-        console.error(error);
-    }
-});
-
-
-// Delete Program
-window.deleteProgram = async function (id) {
-  const confirmation = confirm("هل أنت متأكد أنك تريد حذف هذا البرنامج؟");
-  if (!confirmation) return;
-
-  try {
-    const programRef = doc(db, "programs", id);
-    await deleteDoc(programRef);
-    showAlert("success", "تم حذف البرنامج بنجاح");
-    displayProgramList();
-  } catch (error) {
-    showAlert("error", "خطأ في حذف البرنامج");
-    console.error(error);
-  }
-};
-  // Search functionality for workers
-  document.getElementById('search-bar').addEventListener('input', function () {
-            const searchQuery = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#worker-list tr');
-    
-            rows.forEach(row => {
-                const name = row.children[0]?.textContent.toLowerCase();
-                const password = row.children[1]?.textContent.toLowerCase();
-                const department = row.children[2]?.textContent.toLowerCase();
-    
-                if (name.includes(searchQuery) || password.includes(searchQuery) || department.includes(searchQuery)) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-        });
-
-
+        };
+        
+        const editProgram = (id, name, department) => {
+            currentEditId = id;
+            document.getElementById('program-name').value = name;
+            document.getElementById('department').value = department || '';
+        };
+        
+        // Event Listeners
+        document.getElementById('worker-form').addEventListener('submit', handleWorkerFormSubmit);
+        document.getElementById('program-form').addEventListener('submit', handleProgramFormSubmit);
+        
+        // Initial Data Load
         displayWorkerList();
         displayProgramList();
         </script>
