@@ -116,14 +116,13 @@
                 messagesTable.innerHTML = ""; // Clear current table rows
                 snapshot.forEach(doc => {
                     const { department, message, timestamp } = doc.data();
+                    const formattedTimestamp = timestamp ? new Date(timestamp.seconds * 1000).toLocaleString() : "No timestamp";
+
                     const row = document.createElement("tr");
-
-                    const formattedDate = new Date(timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
-
                     row.innerHTML = `
                         <td class="border px-4 py-2">${department}</td>
                         <td class="border px-4 py-2">${message}</td>
-                        <td class="border px-4 py-2">${formattedDate}</td>
+                        <td class="border px-4 py-2">${formattedTimestamp}</td>
                         <td class="border px-4 py-2">
                             <button class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" data-id="${doc.id}" data-message="${message}">تعديل</button>
                             <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-id="${doc.id}">حذف</button>
@@ -143,7 +142,7 @@
             await addDoc(collection(db, "departmentMessages"), { 
                 department, 
                 message,
-                timestamp: serverTimestamp() // Add timestamp
+                timestamp: serverTimestamp()  // Add timestamp
             });
             e.target.reset();
         });
@@ -159,11 +158,10 @@
 
         confirmEditBtn.addEventListener("click", async () => {
             const updatedMessage = editMessageInput.value;
-            await updateDoc(doc(db, "departmentMessages", currentEditId), { message: updatedMessage });
-            editModal.classList.add("hidden");
-        });
-
-        document.getElementById("cancelEditBtn").addEventListener("click", () => {
+            await updateDoc(doc(db, "departmentMessages", currentEditId), {
+                message: updatedMessage,
+                timestamp: serverTimestamp()  // Update the timestamp when editing
+            });
             editModal.classList.add("hidden");
         });
 
@@ -180,11 +178,16 @@
             confirmationModal.classList.add("hidden");
         });
 
+        // Close modals
+        document.getElementById("cancelEditBtn").addEventListener("click", () => {
+            editModal.classList.add("hidden");
+        });
+
         document.getElementById("cancelDeleteBtn").addEventListener("click", () => {
             confirmationModal.classList.add("hidden");
         });
 
-        // Fetch Messages Real-Time
+        // Load messages on page load
         fetchMessagesRealTime();
     </script>
 </body>
