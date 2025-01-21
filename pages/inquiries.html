@@ -11,7 +11,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, setDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -27,10 +27,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to fetch and display inquiries in table format
+        // Assuming userId is stored or accessible from Firebase Authentication
+        const userId = "worker123";  // Example, replace with actual logged-in worker's user ID
+
+        // Function to fetch and display inquiries for the specific worker
         async function fetchInquiries() {
             const inquiriesRef = collection(db, "departmentInquiries");
-            const snapshot = await getDocs(inquiriesRef);
+            const q = query(inquiriesRef, where("userId", "==", userId)); // Filter by userId
+
+            const snapshot = await getDocs(q);
             const inquiriesList = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
             const inquiriesContainer = document.getElementById("inquiries-container");
@@ -113,7 +118,8 @@
                 // Add the reply to the Firestore subcollection
                 await setDoc(replyRef, {
                     message: replyMessage,
-                    timestamp: serverTimestamp()
+                    timestamp: serverTimestamp(),
+                    userId: userId  // Include userId to associate with the worker
                 });
 
                 // Optionally, you can update the inquiry to mark it as replied
@@ -187,3 +193,4 @@
 
 </body>
 </html>
+
