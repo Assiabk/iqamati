@@ -5,7 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الاقامة الجامعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
 
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -86,6 +114,12 @@
 
     <!-- Login Section -->
     <div id="loginSection" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <div class="text-center mb-6">
+            <!-- Logo Image -->
+            <div class="w-32 h-32 rounded-full overflow-hidden mx-auto border-4 border-orange-500 shadow-md mb-4">
+                <img src="images/iqama_logo.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+        </div>
         <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
         
         <!-- Alert Messages -->
