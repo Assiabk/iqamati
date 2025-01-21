@@ -188,8 +188,7 @@
         // Global variables
         let currentWorkerId = null;
         let isAscending = true; // Sort order (ascending/descending)
-        // Handle worker form submission
-document.getElementById('worker-form').addEventListener('submit', async (e) => {
+       document.getElementById('worker-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name = document.getElementById('worker-name').value;
@@ -232,13 +231,17 @@ document.getElementById('worker-form').addEventListener('submit', async (e) => {
             // After adding the worker, store the worker's unique ID
             const workerId = workerRef.id;  // This is the unique ID for the worker
 
-            // Optionally, you can store this workerId in localStorage or wherever it's needed
-            localStorage.setItem('workerId', workerId); // Save worker ID for future use, e.g., fetching inquiries
+            // Save workerId in localStorage for future use, e.g., fetching inquiries
+            localStorage.setItem('workerId', workerId);
+
+            // Optionally, save workerId in Firestore for future reference (if needed)
+            await updateDoc(doc(db, "workers", workerId), { workerId });
 
             showSuccessAlert('تم إضافة العامل بنجاح');
         }
-    } catch {
+    } catch (error) {
         showErrorAlert('خطأ في معالجة البيانات');
+        console.error("Error saving worker:", error);
     }
 
     // Clear form
