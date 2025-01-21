@@ -188,59 +188,68 @@
         // Global variables
         let currentWorkerId = null;
         let isAscending = true; // Sort order (ascending/descending)
-        
         // Handle worker form submission
-        document.getElementById('worker-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+document.getElementById('worker-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('worker-name').value;
+    const password = document.getElementById('worker-password').value;
+    const department = document.getElementById('worker-department').value;
+
+    if (password.length < 8) {
+        showErrorAlert('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل');
+        return;
+    }
+
+    const iqamaId = localStorage.getItem('iqamaId');
+    if (!iqamaId) {
+        showErrorAlert('لم يتم العثور على رقم الإقامة');
+        return;
+    }
+
+    const workerQuery = query(collection(db, "workers"), where("name", "==", name));
+    const querySnapshot = await getDocs(workerQuery);
+
+    if (!querySnapshot.empty && currentWorkerId === null) {
+        showErrorAlert('اسم العامل موجود بالفعل');
+        return;
+    }
+
+    try {
+        if (currentWorkerId) {
+            // Update worker
+            await updateDoc(doc(db, "workers", currentWorkerId), {
+                name, password, department, iqamaId
+            });
+            showSuccessAlert('تم تحديث بيانات العامل بنجاح');
+            currentWorkerId = null;
+        } else {
+            // Add new worker and generate a unique ID for the worker
+            const workerRef = await addDoc(collection(db, "workers"), {
+                name, password, department, iqamaId
+            });
+
+            // After adding the worker, store the worker's unique ID
+            const workerId = workerRef.id;  // This is the unique ID for the worker
+
+            // Optionally, you can store this workerId in localStorage or wherever it's needed
+            localStorage.setItem('workerId', workerId); // Save worker ID for future use, e.g., fetching inquiries
+
+            showSuccessAlert('تم إضافة العامل بنجاح');
+        }
+    } catch {
+        showErrorAlert('خطأ في معالجة البيانات');
+    }
+
+    // Clear form
+    document.getElementById('worker-name').value = '';
+    document.getElementById('worker-password').value = '';
+    document.getElementById('worker-department').value = '';
+    displayWorkerList();
+});
+
         
-            const name = document.getElementById('worker-name').value;
-            const password = document.getElementById('worker-password').value;
-            const department = document.getElementById('worker-department').value;
-        
-            if (password.length < 8) {
-                showErrorAlert('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل');
-                return;
-            }
-        
-            const iqamaId = localStorage.getItem('iqamaId');
-            if (!iqamaId) {
-                showErrorAlert('لم يتم العثور على رقم الإقامة');
-                return;
-            }
-        
-            const workerQuery = query(collection(db, "workers"), where("name", "==", name));
-            const querySnapshot = await getDocs(workerQuery);
-        
-            if (!querySnapshot.empty && currentWorkerId === null) {
-                showErrorAlert('اسم العامل موجود بالفعل');
-                return;
-            }
-        
-            try {
-                if (currentWorkerId) {
-                    // Update worker
-                    await updateDoc(doc(db, "workers", currentWorkerId), {
-                        name, password, department, iqamaId
-                    });
-                    showSuccessAlert('تم تحديث بيانات العامل بنجاح');
-                    currentWorkerId = null;
-                } else {
-                    // Add new worker
-                    await addDoc(collection(db, "workers"), {
-                        name, password, department, iqamaId
-                    });
-                    showSuccessAlert('تم إضافة العامل بنجاح');
-                }
-            } catch {
-                showErrorAlert('خطأ في معالجة البيانات');
-            }
-        
-            // Clear form
-            document.getElementById('worker-name').value = '';
-            document.getElementById('worker-password').value = '';
-            document.getElementById('worker-department').value = '';
-            displayWorkerList();
-        });
+             
         
         // Show success alert
         function showSuccessAlert(message) {
