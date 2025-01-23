@@ -8,32 +8,75 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
     }
 
     .fade-in {
-      animation: fadeIn 0.4s ease-out;
+        animation: fadeIn 1s ease-out forwards;
     }
-  </style>
-</head>
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+
+    @keyframes slideUp {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
-  <div class="container mx-auto p-6 space-y-8">
-    <!-- Header -->
-    <header class="text-center mb-6">
-      <h1 class="text-4xl font-extrabold text-orange-600">إدارة الديوان الوطني للخدمات الجامعية</h1>
-      <p class="text-gray-600 mt-2">إضافة، تعديل، وحذف حسابات الإقامات والمديريات</p>
-    </header>
+  <!-- Error Alert -->
+  <div id="error-alert" class="hidden bg-red-100 text-red-800 p-4 rounded-lg shadow-md mb-4 fade-in">
+    <span id="error-message">البريد الإلكتروني أو كلمة السر غير صحيحة</span>
+  </div>
 
-    <!-- Buttons -->
+  <div class="container mx-auto p-6 space-y-8">
+    <!-- Login Form -->
+    <div id="login-form" class="flex justify-center">
+      <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+        <div class="text-center mb-6">
+          <!-- Logo Image -->
+          <div class="w-32 h-32 rounded-full overflow-hidden mx-auto border-4 border-orange-500 shadow-md mb-4">
+              <img src="images/iqama_logo.jpg" alt="Logo" class="w-full h-full object-cover">
+          </div>
+      </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">تسجيل الدخول</h2>
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label for="email" class="block text-gray-700">البريد الإلكتروني:</label>
+            <input type="email" id="email" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل البريد الإلكتروني" required>
+          </div>
+          <div>
+            <label for="password" class="block text-gray-700">كلمة السر:</label>
+            <input type="password" id="password" class="w-full border border-gray-300 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500" placeholder="أدخل كلمة السر" required>
+          </div>
+          <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition duration-300 w-full">
+            تسجيل الدخول
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Content (Hidden Until Login) -->
+    <div id="content" class="hidden">
+      <!-- Header -->
+      <header class="text-center mb-6">
+        <h1 class="text-4xl font-extrabold text-orange-600">إدارة الديوان الوطني للخدمات الجامعية</h1>
+        <p class="text-gray-600 mt-2">إضافة، تعديل، وحذف حسابات الإقامات والمديريات</p>
+      </header>
     <div class="flex flex-col sm:flex-row sm:justify-center sm:gap-4 gap-4">
       <button id="add-modiriya-btn" class="bg-orange-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-600 transition duration-300">
         إضافة مديرية
@@ -181,6 +224,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
   
+
+
+// Login credentials
+const validEmail = "iqamatidz@gmail.com";
+    const validPassword = "iqamatidzstartup2025";
+
+    document.getElementById("login-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (email === validEmail && password === validPassword) {
+        document.getElementById("login-form").classList.add("hidden");
+        document.getElementById("content").classList.remove("hidden");
+        document.getElementById("error-alert").classList.add("hidden");  // Hide error alert on success
+      } else {
+        // Show error alert
+        document.getElementById("error-alert").classList.remove("hidden");
+      }
+    });
+
+    // Toggle Forms
+    document.getElementById("add-modiriya-btn").addEventListener("click", function() {
+      document.getElementById("modiriya-form-container").classList.toggle("hidden");
+    });
+
+    document.getElementById("add-iqama-btn").addEventListener("click", function() {
+      document.getElementById("iqama-form-container").classList.toggle("hidden");
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
       const addModiriyaBtn = document.getElementById("add-modiriya-btn");
       const addIqamaBtn = document.getElementById("add-iqama-btn");
@@ -344,3 +418,4 @@
 </body>
 
 </html>
+
