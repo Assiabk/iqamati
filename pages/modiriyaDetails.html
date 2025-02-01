@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل المديرية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-6 md:p-12">
+
+    <!-- Modiriya Details Card -->
+    <div class="max-w-full sm:max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg mb-10">
+        <h2 class="text-2xl font-semibold text-orange-600 text-center mb-6 flex items-center justify-center gap-2">
+            <i class="fas fa-city text-3xl"></i>
+            تفاصيل المديرية
+        </h2>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>المعرف (Doc ID):</strong></p>
+                <span id="docId" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>المنطقة:</strong></p>
+                <span id="region" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>الاسم:</strong></p>
+                <span id="name" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>الموقع:</strong></p>
+                <span id="location" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>البريد الإلكتروني:</strong></p>
+                <span id="email" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>الهاتف:</strong></p>
+                <span id="phone" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-gray-600"><strong>كلمة المرور:</strong></p>
+                <span id="password" class="text-sm text-gray-500"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- IQAMAs Table Section -->
+    <div class="max-w-full sm:max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold text-orange-600 mb-4 flex items-center justify-center gap-2">
+            <i class="fas fa-list-ul text-xl"></i>
+            الإقامات الجامعية المرتبطة
+        </h3>
+        
+        <div id="alertMessage" class="hidden p-4 bg-red-100 text-red-700 rounded-lg mb-4"></div>
+
+        <!-- Scrollable Table Container -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white table-auto border-collapse rounded-lg overflow-hidden">
+                <thead id="tableHeader" class="bg-orange-100">
+                    <!-- Table headers will be inserted here -->
+                </thead>
+                <tbody id="iqamasTableBody">
+                    <!-- IQAMAs will be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button onclick="window.history.back()" class="mt-6 bg-orange-600 text-white px-6 py-3 rounded-full flex items-center gap-2 mx-auto">
+        <i class="fas fa-arrow-left"></i> رجوع
+    </button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+          authDomain: "iqamatisite.firebaseapp.com",
+          projectId: "iqamatisite",
+          storageBucket: "iqamatisite.firebasestorage.app",
+          messagingSenderId: "240286199373",
+          appId: "1:240286199373:web:c1c9b01529edf378f33604"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to get query parameter from URL
+        function getQueryParam(param) {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(param);
+        }
+
+        // Get docId from URL
+        const docId = getQueryParam("docId");
+
+        // Retrieve and display Modiriya details
+        async function fetchModiriyaDetails() {
+          if (!docId) {
+            console.error("No docId found in URL");
+            return;
+          }
+
+          try {
+            const modiriyaRef = doc(db, "modiriyas", docId);
+            const modiriyaSnap = await getDoc(modiriyaRef);
+
+            if (modiriyaSnap.exists()) {
+              const modiriya = modiriyaSnap.data();
+              document.getElementById("docId").textContent = docId; // Show docId
+              document.getElementById("region").textContent = modiriya.region;
+              document.getElementById("name").textContent = modiriya.name;
+              document.getElementById("location").textContent = modiriya.location;
+              document.getElementById("email").textContent = modiriya.email;
+              document.getElementById("phone").textContent = modiriya.phone;
+              document.getElementById("password").textContent = modiriya.password; 
+              
+              // Fetch related IQAMAs using the modiriya docId
+              fetchIqamas(modiriyaRef);
+            } else {
+              console.error("No document found with this ID");
+            }
+          } catch (error) {
+            console.error("Error fetching modiriya details:", error);
+          }
+        }
+
+        // Fetch IQAMAs related to the modiriya
+        async function fetchIqamas(modiriyaRef) {
+          const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaRef.id));
+          const iqamasSnapshot = await getDocs(iqamasQuery);
+
+          const iqamasTableBody = document.getElementById("iqamasTableBody");
+          const tableHeader = document.getElementById("tableHeader");
+          const alertMessage = document.getElementById("alertMessage");
+
+          iqamasTableBody.innerHTML = "";
+          tableHeader.innerHTML = "";
+
+          // Check if there are any IQAMAs
+          if (iqamasSnapshot.empty) {
+            alertMessage.textContent = "لا توجد بيانات للإقامات الجامعية لهذه المديرية.";
+            alertMessage.classList.remove("hidden");
+            return;
+          } else {
+            alertMessage.classList.add("hidden");
+          }
+
+          // Table headers
+          const headers = [
+            { label: "الاسم", key: "name" },
+            { label: "الموقع", key: "location" },
+            { label: "الهاتف", key: "phone" },
+            { label: "المنطقة", key: "region" },
+            { label: "البريد الإلكتروني", key: "email" }
+          ];
+
+          let headerRow = "<tr>";
+          headers.forEach((header) => {
+            headerRow += `<th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">${header.label}</th>`;
+          });
+          headerRow += "</tr>";
+          tableHeader.innerHTML = headerRow;
+
+          // Table rows with click event
+          iqamasSnapshot.forEach((doc) => {
+            const iqama = doc.data();
+            let row = document.createElement("tr");
+            row.classList.add("cursor-pointer", "hover:bg-gray-200", "transition");
+
+            headers.forEach((header) => {
+              let cell = document.createElement("td");
+              cell.classList.add("px-6", "py-4", "border-b", "text-sm", "text-gray-700");
+              cell.textContent = iqama[header.key] || "غير متوفر";
+              row.appendChild(cell);
+            });
+
+            // Add click event to navigate to IQAMA details page
+            row.addEventListener("click", () => {
+              const iqamaId = doc.id; // This is the document ID (iqamaId) from Firestore
+              window.location.href = `iqamaDetails.html?iqamaId=${iqamaId}`;
+            });
+
+            iqamasTableBody.appendChild(row);
+          });
+        }
+
+        // Run fetchModiriyaDetails when the page loads
+        document.addEventListener("DOMContentLoaded", fetchModiriyaDetails);
+    </script>
+</body>
+</html>
