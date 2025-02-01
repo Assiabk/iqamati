@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الإقامة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+        .card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .table-container {
+            max-height: 250px; /* Limit the height of the table */
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+
+    <!-- IQAMA Details Section -->
+    <div class="container mx-auto px-4 py-6">
+        <div id="iqamaDetails" class="max-w-3xl mx-auto card p-6 mt-6">
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-orange-600 mb-3">
+                    <i class="fas fa-id-card-alt mr-2"></i>تفاصيل الإقامة
+                </h2>
+                <hr class="border-t-2 border-orange-600 w-1/4 mx-auto mb-4">
+            </div>
+
+            <!-- IQAMA Information -->
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <i class="fas fa-user text-orange-600 mr-3 text-lg"></i>
+                    <h3 class="text-md font-semibold">الاسم:</h3>
+                    <p id="iqamaName" class="text-sm text-gray-600 ml-2">تحميل البيانات...</p>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-map-marker-alt text-orange-600 mr-3 text-lg"></i>
+                    <h3 class="text-md font-semibold">الموقع:</h3>
+                    <p id="iqamaLocation" class="text-sm text-gray-600 ml-2">تحميل البيانات...</p>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-phone-alt text-orange-600 mr-3 text-lg"></i>
+                    <h3 class="text-md font-semibold">الهاتف:</h3>
+                    <p id="iqamaPhone" class="text-sm text-gray-600 ml-2">تحميل البيانات...</p>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-globe text-orange-600 mr-3 text-lg"></i>
+                    <h3 class="text-md font-semibold">المنطقة:</h3>
+                    <p id="iqamaRegion" class="text-sm text-gray-600 ml-2">تحميل البيانات...</p>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-envelope text-orange-600 mr-3 text-lg"></i>
+                    <h3 class="text-md font-semibold">البريد الإلكتروني:</h3>
+                    <p id="iqamaEmail" class="text-sm text-gray-600 ml-2">تحميل البيانات...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workers, Students, Orders, Rooms, Clubs, and Appointments Section -->
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Workers Section -->
+            <div id="workersSection" class="card p-6">
+                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-users mr-2"></i>العمال المرتبطون بالإقامة
+                </h2>
+                <div class="table-container mt-4">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead class="bg-orange-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-right">الاسم</th>
+                                <th class="px-4 py-2 text-right">القسم</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workersTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevWorkers" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+                    <button id="nextWorkers" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div id="studentsSection" class="card p-6">
+                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-user-graduate mr-2"></i>الطلاب المرتبطون بالإقامة
+                </h2>
+                <div class="table-container mt-4">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead class="bg-orange-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-right">رقم الطالب</th>
+                                <th class="px-4 py-2 text-right">الاسم</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevStudents" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+                    <button id="nextStudents" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="ordersSection" class="card p-6">
+                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-utensils mr-2"></i>الطلبات اليومية
+                </h2>
+                <div class="table-container mt-4">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead class="bg-orange-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-right">رقم الطالب</th>
+                                <th class="px-4 py-2 text-right">نوع الطعام</th>
+                                <th class="px-4 py-2 text-right">تاريخ الطلب</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevOrders" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+                    <button id="nextOrders" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
+
+            <!-- Rooms Section -->
+            <div id="roomsSection" class="card p-6">
+                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-bed mr-2"></i>عدد الغرف المرتبطة بالإقامة
+                </h2>
+                <div class="table-container mt-4">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead class="bg-orange-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-right">رقم الغرفة</th>
+                                <th class="px-4 py-2 text-right">عدد الغرف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevRoom" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">التالي</button>
+                    <button id="nextRoom" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
+
+<!-- Clubs Section -->
+<div id="clubsSection" class="card p-6">
+    <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-futbol mr-2"></i>الأندية المرتبطة بالإقامة
+    </h2>
+    <div class="table-container mt-4">
+        <table class="min-w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-orange-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-right">اسم النادي</th>
+                </tr>
+            </thead>
+            <tbody id="clubsTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    <div class="flex justify-between mt-4">
+        <button id="prevClubs" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+        <button id="nextClubs" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+    </div>
+    <!-- Modal to display events -->
+    <div id="eventsModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h3 class="text-xl font-semibold text-orange-600 mb-4">الفعاليات</h3>
+            <ul id="eventsList" class="list-disc pl-6">
+                <!-- Events will be dynamically added here -->
+            </ul>
+            <button id="closeModal" class="bg-orange-600 text-white px-4 py-2 rounded mt-4">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Appointments Section -->
+            <div id="appointmentsSection" class="card p-6">
+                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-calendar-check mr-2"></i>المواعيد الطبية
+                </h2>
+                <div class="table-container mt-4">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead class="bg-orange-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-right">رقم الطالب</th>
+                                <th class="px-4 py-2 text-right">تاريخ الموعد</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevAppointments" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+                    <button id="nextAppointments" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <div id="eventsSection" class="card p-6 max-w-md mx-auto">
+
+    <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-calendar mr-2"></i>الفعاليات
+    </h2>
+    <div class="table-container mt-4">
+        <table class="min-w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-orange-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-right">اسم الفعالية</th>
+                </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    <div class="flex justify-between mt-4">
+        <button id="prevEvents" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+        <button id="nextEvents" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+    </div>
+</div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
+    authDomain: "iqamatisite.firebaseapp.com",
+    projectId: "iqamatisite",
+    storageBucket: "iqamatisite.appspot.com",
+    messagingSenderId: "240286199373",
+    appId: "1:240286199373:web:c1c9b01529edf378f33604"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+    // Get the iqamaId from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const iqamaId = urlParams.get('iqamaId');
+
+    // Pagination Variables
+    let workersPage = 0;
+    let studentsPage = 0;
+    const rowsPerPage = 5;
+
+    if (iqamaId) {
+        // Fetch IQAMA Details
+        getDoc(doc(db, "iqamas", iqamaId))
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const iqamaData = docSnap.data();
+                    document.getElementById("iqamaName").textContent = iqamaData.name || "غير متوفر";
+                    document.getElementById("iqamaLocation").textContent = iqamaData.location || "غير متوفر";
+                    document.getElementById("iqamaPhone").textContent = iqamaData.phone || "غير متوفر";
+                    document.getElementById("iqamaRegion").textContent = iqamaData.region || "غير متوفر";
+                    document.getElementById("iqamaEmail").textContent = iqamaData.email || "غير متوفر";
+                } else {
+                    document.getElementById("iqamaDetails").innerHTML = "<p>لم يتم العثور على البيانات.</p>";
+                }
+            })
+            .catch((error) => {
+                console.error("Error getting document:", error);
+                document.getElementById("iqamaDetails").innerHTML = "<p>حدث خطأ أثناء تحميل البيانات.</p>";
+            });
+
+        // Fetch Workers
+        getDocs(query(collection(db, "workers"), where("iqamaId", "==", iqamaId)))
+            .then((workersSnapshot) => {
+                const workersTableBody = document.getElementById("workersTableBody");
+                const workersData = workersSnapshot.docs.map(doc => doc.data());
+
+                function displayWorkers() {
+                    workersTableBody.innerHTML = "";
+                    const pageWorkers = workersData.slice(workersPage * rowsPerPage, (workersPage + 1) * rowsPerPage);
+
+                    pageWorkers.forEach(worker => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td class="px-4 py-2 border-b">${worker.name || "غير متوفر"}</td>
+                            <td class="px-4 py-2 border-b">${worker.department || "غير متوفر"}</td>`;
+                        workersTableBody.appendChild(row);
+                    });
+
+                    document.getElementById("prevWorkers").disabled = workersPage === 0;
+                    document.getElementById("nextWorkers").disabled = workersPage >= Math.ceil(workersData.length / rowsPerPage) - 1;
+                }
+
+                displayWorkers();
+
+                document.getElementById("nextWorkers").onclick = () => { if (workersPage < Math.ceil(workersData.length / rowsPerPage) - 1) { workersPage++; displayWorkers(); } };
+                document.getElementById("prevWorkers").onclick = () => { if (workersPage > 0) { workersPage--; displayWorkers(); } };
+            })
+            .catch((error) => {
+                console.error("Error fetching workers:", error);
+            });
+
+        // Fetch Students
+        getDocs(query(collection(db, "students"), where("iqamaId", "==", iqamaId)))
+            .then((studentsSnapshot) => {
+                const studentsTableBody = document.getElementById("studentsTableBody");
+                const studentsData = studentsSnapshot.docs.map(doc => doc.data());
+
+                function displayStudents() {
+                    studentsTableBody.innerHTML = "";
+                    const pageStudents = studentsData.slice(studentsPage * rowsPerPage, (studentsPage + 1) * rowsPerPage);
+
+                    pageStudents.forEach(student => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td class="px-4 py-2 border-b">${student.matricule || "غير متوفر"}</td>
+                            <td class="px-4 py-2 border-b">${student.name || "غير متوفر"}</td>`;
+                        studentsTableBody.appendChild(row);
+                    });
+
+                    document.getElementById("prevStudents").disabled = studentsPage === 0;
+                    document.getElementById("nextStudents").disabled = studentsPage >= Math.ceil(studentsData.length / rowsPerPage) - 1;
+                }
+
+                displayStudents();
+
+                document.getElementById("nextStudents").onclick = () => { if (studentsPage < Math.ceil(studentsData.length / rowsPerPage) - 1) { studentsPage++; displayStudents(); } };
+                document.getElementById("prevStudents").onclick = () => { if (studentsPage > 0) { studentsPage--; displayStudents(); } };
+            })
+            .catch((error) => {
+                console.error("Error fetching students:", error);
+            });
+let currentPage = 0;  // Move the initialization here to avoid scope issues
+const itemsPerPage = 5; // Maximum rows per page
+
+try {
+    const ordersSnapshot = await getDocs(query(collection(db, "orders"), where("orderIqamaId", "==", iqamaId)));
+
+    const ordersTableBody = document.getElementById("ordersTableBody");
+    ordersTableBody.innerHTML = ""; // Clear previous content
+
+    let ordersData = [];
+    let hasOrders = false;
+
+    // Extract order data
+    ordersSnapshot.forEach((doc) => {
+        const order = doc.data();
+        const orderDate = order.orderDate?.toDate(); // Convert Firestore timestamp
+        const formattedOrderDate = orderDate ? orderDate.toISOString().split("T")[0] : "غير متوفر";
+
+        console.log("Order Data:", order);
+        console.log("Order Date:", formattedOrderDate);
+
+        ordersData.push({
+            matricule: order.orderStudentMatricule || "غير متوفر",
+            foodType: order.orderFoodType || "غير متوفر",
+            orderDate: formattedOrderDate
+        });
+
+        hasOrders = true;
+    });
+
+    // Function to display orders for the current page
+    function displayOrders() {
+        ordersTableBody.innerHTML = ""; // Clear previous rows
+
+        // Calculate the range of orders to display
+        const startIndex = currentPage * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentOrders = ordersData.slice(startIndex, endIndex);
+
+        // Loop through the current page's orders and add them to the table
+        currentOrders.forEach(order => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="px-4 py-2 border-b text-right">${order.matricule}</td>
+                <td class="px-4 py-2 border-b text-right">${order.foodType}</td>
+                <td class="px-4 py-2 border-b text-right">${order.orderDate}</td>`;
+            ordersTableBody.appendChild(row);
+        });
+
+        // If no orders, display a message
+        if (!hasOrders) {
+            ordersTableBody.innerHTML = "<tr><td colspan='3' class='text-center py-4'>لا توجد طلبات.</td></tr>";
+        }
+
+        // Disable/Enable the Next and Previous buttons based on the current page
+        document.getElementById("prevOrders").disabled = currentPage === 0;
+        document.getElementById("nextOrders").disabled = currentPage >= Math.ceil(ordersData.length / itemsPerPage) - 1;
+    }
+
+    // Initial display of orders
+    displayOrders();
+
+    // Add event listeners for Next and Previous buttons
+    document.getElementById("prevOrders").addEventListener("click", () => {
+        if (currentPage > 0) {
+            currentPage--;
+            displayOrders();
+        }
+    });    
+
+    document.getElementById("nextOrders").addEventListener("click", () => {
+        if (currentPage < Math.ceil(ordersData.length / itemsPerPage) - 1) {
+            currentPage++;
+            displayOrders();
+        }
+    });
+
+} catch (error) {
+    console.error("Error fetching orders:", error);
+    document.getElementById("ordersTableBody").innerHTML = "<tr><td colspan='3' class='text-center py-4'>حدث خطأ أثناء تحميل الطلبات.</td></tr>";
+}}
+
+let currentRoomPage = 0; // Page counter
+const roomsPerPage = 5;  // Number of rooms per page
+
+// Function to fetch room data and display it in the table
+async function fetchRoomData(iqamaId) {
+    const roomsTableBody = document.getElementById('roomsTableBody');
+
+    try {
+        // Create a query to fetch data from 'student_housing' collection, filtering by iqamaId
+        const q = query(collection(db, "student_housing"), where("iqamaId", "==", iqamaId));
+
+        // Get the documents from the query
+        const querySnapshot = await getDocs(q);
+
+        // Create an object to store room numbers and counts
+        const rooms = {};
+
+        querySnapshot.forEach(doc => {
+            const roomNumber = doc.data().roomNumber;
+            // Increment the room count if it already exists, or initialize it if not
+            if (rooms[roomNumber]) {
+                rooms[roomNumber]++;
+            } else {
+                rooms[roomNumber] = 1;
+            }
+        });
+
+        // Convert the rooms object to an array for pagination
+        const roomsArray = Object.entries(rooms);
+
+        // Get the slice of rooms to display based on the current page
+        const start = currentRoomPage * roomsPerPage;
+        const end = start + roomsPerPage;
+        const roomsToDisplay = roomsArray.slice(start, end);
+
+        // Clear previous rows in the table body
+        roomsTableBody.innerHTML = '';
+
+        // Loop through the roomsToDisplay array and display the room numbers and counts in the table
+        roomsToDisplay.forEach(([roomNumber, count]) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-4 py-2 text-right">${roomNumber}</td>
+                <td class="px-4 py-2 text-right">${count}</td>
+            `;
+            roomsTableBody.appendChild(row);
+        });
+
+        // Disable/enable buttons based on current page
+        document.getElementById('prevRoom').disabled = currentRoomPage === 0;
+        document.getElementById('nextRoom').disabled = end >= roomsArray.length;
+
+    } catch (error) {
+        console.error('Error fetching room data:', error);
+    }
+}
+
+// Event listeners for navigation buttons
+document.getElementById('prevRoom').addEventListener('click', () => {
+    if (currentRoomPage > 0) {
+        currentRoomPage--;
+        fetchRoomData(iqamaId); // Re-fetch room data for the updated page
+    }
+});
+
+document.getElementById('nextRoom').addEventListener('click', () => {
+    currentRoomPage++;
+    fetchRoomData(iqamaId); // Re-fetch room data for the updated page
+});
+
+// Assuming iqamaId is already available in the global context, call the function initially
+fetchRoomData(iqamaId); // Call with the iqamaId for filtering
+
+
+
+let currentClubPage = 0;  // Page counter for clubs
+const clubsPerPage = 5;   // Number of clubs per page
+
+// Fetch clubs and display them
+async function fetchClubs(iqamaId) {
+    const clubsSnapshot = await getDocs(query(collection(db, "clubs"), where("iqamaId", "==", iqamaId)));
+    const clubsTableBody = document.getElementById("clubsTableBody");
+    clubsTableBody.innerHTML = ""; // Clear previous content
+
+    const clubsData = clubsSnapshot.docs.map(doc => doc.data());
+    const clubsToDisplay = clubsData.slice(currentClubPage * clubsPerPage, (currentClubPage + 1) * clubsPerPage);
+
+    let hasClubs = false;
+
+    clubsToDisplay.forEach((club) => {
+        hasClubs = true;
+        const row = document.createElement("tr");
+        row.classList.add("cursor-pointer");
+        // row.addEventListener('click', () => displayClubEvents(club.clubName, iqamaId)); // Add event listener to each row
+        row.innerHTML = `
+            <td class="px-4 py-2 border-b text-right">${club.clubName || "غير متوفر"}</td>`;
+        clubsTableBody.appendChild(row);
+    });
+
+    if (!hasClubs) {
+        clubsTableBody.innerHTML = "<tr><td colspan='1' class='text-center py-4'>لا توجد أندية.</td></tr>";
+    }
+
+    document.getElementById("prevClubs").disabled = currentClubPage === 0;
+    document.getElementById("nextClubs").disabled = (currentClubPage + 1) * clubsPerPage >= clubsData.length;
+}
+
+// Fetch and display events for the selected club
+async function displayClubEvents(clubName, iqamaId) {
+    const faaliyatsSnapshot = await getDocs(query(collection(db, "faaliyats"), where("iqamaId", "==", iqamaId), where("clubName", "==", clubName)));
+    const eventsList = document.getElementById("eventsList");
+    eventsList.innerHTML = ""; // Clear any existing events
+
+    const faaliyatData = faaliyatsSnapshot.docs.map(doc => doc.data());
+    if (faaliyatData.length > 0) {
+        faaliyatData.forEach((event) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = event.faaliyatPostText || "لا توجد فعاليات لهذا النادي."; // Display the event text
+            eventsList.appendChild(listItem);
+        });
+    } else {
+        const noEventsItem = document.createElement('li');
+        noEventsItem.textContent = "لا توجد فعاليات لهذا النادي."; // Message if no events
+        eventsList.appendChild(noEventsItem);
+    }
+
+    // Show the modal with events
+    document.getElementById('eventsModal').classList.remove('hidden');
+}
+
+// Event listeners for clubs pagination
+document.getElementById('prevClubs').addEventListener('click', () => {
+    if (currentClubPage > 0) {
+        currentClubPage--;
+        fetchClubs(iqamaId); // Re-fetch club data for the updated page
+    }
+});
+
+document.getElementById('nextClubs').addEventListener('click', () => {
+    currentClubPage++;
+    fetchClubs(iqamaId); // Re-fetch club data for the updated page
+});
+
+// Close the modal when the close button is clicked
+document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('eventsModal').classList.add('hidden');
+});
+
+
+
+// Assuming iqamaId is already available in the global context, call the function initially
+fetchClubs(iqamaId);
+// Fetch Appointments
+let currentPage = 0;
+const itemsPerPage = 5; // Maximum rows per page
+
+getDocs(query(collection(db, "appoitments"), where("iqamaId", "==", iqamaId)))
+    .then((appointmentsSnapshot) => {
+        const appointmentsTableBody = document.getElementById("appointmentsTableBody");
+        const appointmentsData = appointmentsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            console.log(data); // Log each document to inspect its fields
+            return data;
+        });
+
+        // Function to display appointments for the current page
+        function displayAppointments() {
+            appointmentsTableBody.innerHTML = ""; // Clear previous rows
+
+            // Calculate the range of appointments to display
+            const startIndex = currentPage * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentAppointments = appointmentsData.slice(startIndex, endIndex);
+
+            // Loop through the current page's appointments and add them to the table
+            currentAppointments.forEach(appointment => {
+                console.log("Appointment Date:", appointment.appoitmentDate); // Fix typo
+
+                const appointmentDate = appointment.appoitmentDate || "غير متوفر"; // Default if no date
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="px-4 py-2 border-b text-right">${appointment.matricule || "غير متوفر"}</td>
+                    <td class="px-4 py-2 border-b text-right">${appointmentDate}</td>`;
+                appointmentsTableBody.appendChild(row);
+            });
+
+            // Disable/Enable the Next and Previous buttons based on the current page
+            document.getElementById("prevAppointments").disabled = currentPage === 0;
+            document.getElementById("nextAppointments").disabled = currentPage >= Math.ceil(appointmentsData.length / itemsPerPage) - 1;
+        }
+
+        // Initial display of appointments
+        displayAppointments();
+
+        // Add event listeners for Next and Previous buttons
+        document.getElementById("prevAppointments").addEventListener("click", () => {
+            if (currentPage > 0) {
+                currentPage--;
+                displayAppointments();
+            }
+        });
+
+        document.getElementById("nextAppointments").addEventListener("click", () => {
+            if (currentPage < Math.ceil(appointmentsData.length / itemsPerPage) - 1) {
+                currentPage++;
+                displayAppointments();
+            }
+        });
+
+    })
+    .catch((error) => {
+        console.error("Error fetching appointments:", error);
+        document.getElementById("appointmentsTableBody").innerHTML = "<tr><td colspan='2' class='text-center py-4'>حدث خطأ أثناء تحميل المواعيد.</td></tr>";
+    });
+    let currentEventPage = 0;  // Page counter for events
+const eventsPerPage = 5;   // Number of events per page
+
+// Function to fetch events from the "faaliyats" collection for a specific iqamaId
+async function fetchEvents(iqamaId) {
+    console.log("Fetching events for iqamaId:", iqamaId);
+
+    try {
+      // Create a query that matches documents where the "iqamaId" field equals the passed value
+      const eventsQuery = query(
+        collection(db, "faaliyats"),
+        where("iqamaId", "==", iqamaId)
+      );
+      
+      // Execute the query
+      const eventsSnapshot = await getDocs(eventsQuery);
+      console.log("Events Snapshot:", eventsSnapshot);
+
+      const eventsTableBody = document.getElementById("eventsTableBody");
+      eventsTableBody.innerHTML = ""; // Clear previous content
+
+      // If no documents match the query, log a message and display a friendly message in the table
+      if (eventsSnapshot.empty) {
+        console.log("No events found for this IQAMA.");
+        eventsTableBody.innerHTML = `<tr>
+          <td colspan="1" class="text-center py-4">لا توجد فعاليات.</td>
+        </tr>`;
+        // Disable pagination buttons since there is nothing to paginate
+        document.getElementById("prevEvents").disabled = true;
+        document.getElementById("nextEvents").disabled = true;
+        return;
+      }
+
+      // Map the documents to their data objects
+      const eventsData = eventsSnapshot.docs.map(doc => doc.data());
+      console.log("Events Data:", eventsData);
+
+      // Calculate the slice for the current page
+      const startIndex = currentEventPage * eventsPerPage;
+      const eventsToDisplay = eventsData.slice(startIndex, startIndex + eventsPerPage);
+
+      // If no events are on this page, display a message
+      if (eventsToDisplay.length === 0) {
+        console.log("No events to display on this page.");
+        eventsTableBody.innerHTML = `<tr>
+          <td colspan="1" class="text-center py-4">لا توجد فعاليات.</td>
+        </tr>`;
+      } else {
+        // Loop over events and add them to the table
+        eventsToDisplay.forEach(event => {
+          console.log("Event Data:", event);
+          const row = document.createElement("tr");
+          row.innerHTML = `<td class="px-4 py-2 border-b text-right">${event.faaliyatPostText || "لا توجد فعاليات"}</td>`;
+          eventsTableBody.appendChild(row);
+        });
+      }
+
+      // Update the pagination buttons based on the current page
+      document.getElementById("prevEvents").disabled = currentEventPage === 0;
+      document.getElementById("nextEvents").disabled = startIndex + eventsPerPage >= eventsData.length;
+
+      console.log(
+        "Pagination Updated: prevEvents disabled -", currentEventPage === 0,
+        ", nextEvents disabled -", startIndex + eventsPerPage >= eventsData.length
+      );
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  }
+
+  // Initial fetch on page load
+  fetchEvents(iqamaId);
+
+  // Pagination event listeners
+  document.getElementById('prevEvents').addEventListener('click', () => {
+    if (currentEventPage > 0) {
+      currentEventPage--;
+      fetchEvents(iqamaId);
+    }
+  });
+
+  document.getElementById('nextEvents').addEventListener('click', () => {
+    currentEventPage++;
+    fetchEvents(iqamaId);
+  });
+</script>
+</body>
+</html>
