@@ -136,6 +136,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
     
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
             authDomain: "iqamatisite.firebaseapp.com",
@@ -145,56 +146,65 @@
             appId: "1:240286199373:web:c1c9b01529edf378f33604"
         };
     
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
+    
+        // Handle login form submission
         document.getElementById("loginForm").addEventListener("submit", async (event) => {
             event.preventDefault();
-
+    
+            // Get input values
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
             const alertMessage = document.getElementById("alertMessage");
-
+    
+            // Reset alert message styles
             alertMessage.classList.add("hidden");
             alertMessage.classList.remove("bg-green-100", "text-green-700", "bg-red-100", "text-red-700");
-
+    
+            // Validate input
             if (!email || !password) {
                 alertMessage.textContent = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
                 alertMessage.classList.add("bg-red-100", "text-red-700");
                 alertMessage.classList.remove("hidden");
                 return;
             }
-
+    
             try {
+                // Query Firestore for user credentials
                 const modiriyaQuery = query(
                     collection(db, "modiriyas"),
                     where("email", "==", email),
                     where("password", "==", password)
                 );
-
+    
                 const modiriyaSnapshot = await getDocs(modiriyaQuery);
-
+    
                 if (modiriyaSnapshot.empty) {
                     alertMessage.textContent = "فشل تسجيل الدخول. تأكد من صحة البريد الإلكتروني وكلمة المرور.";
                     alertMessage.classList.add("bg-red-100", "text-red-700");
                     alertMessage.classList.remove("hidden");
                     return;
                 }
-
+    
+                // Get user data
                 const modiriyaDoc = modiriyaSnapshot.docs[0];
                 const modiriyaData = modiriyaDoc.data();
-
+    
+                // Display user information
                 document.getElementById("modiriyaName").textContent = modiriyaData.name || "غير متوفر";
                 document.getElementById("modiriyaEmail").textContent = modiriyaData.email || "غير متوفر";
                 document.getElementById("modiriyaLocation").textContent = modiriyaData.location || "غير متوفر";
-
-
+    
+                // Hide login form, show user info
                 document.getElementById("loginSection").classList.add("hidden");
                 document.getElementById("modiriyaInfo").classList.remove("hidden");
-
+    
+                // Fetch iqama data for the logged-in modiriya
                 const iqamasQuery = query(collection(db, "iqamas"), where("modiriya", "==", modiriyaDoc.id));
                 const iqamasSnapshot = await getDocs(iqamasQuery);
-
+    
                 if (iqamasSnapshot.empty) {
                     alertMessage.textContent = "لا توجد بيانات للإقامات الجامعية لهذه المديرية.";
                     alertMessage.classList.add("bg-red-100", "text-red-700");
@@ -202,10 +212,11 @@
                 } else {
                     const iqamasTableBody = document.getElementById("iqamasTableBody");
                     const tableHeader = document.getElementById("tableHeader");
-
+    
                     iqamasTableBody.innerHTML = "";
                     tableHeader.innerHTML = "";
-
+    
+                    // Table headers
                     const headers = [
                         { label: "الاسم", key: "name" },
                         { label: "الموقع", key: "location" },
@@ -213,24 +224,38 @@
                         { label: "المنطقة", key: "region" },
                         { label: "البريد الإلكتروني", key: "email" }
                     ];
-
+    
                     let headerRow = "<tr>";
                     headers.forEach((header) => {
                         headerRow += `<th class="px-6 py-3 text-right">${header.label}</th>`;
                     });
                     headerRow += "</tr>";
                     tableHeader.innerHTML = headerRow;
-
+    
+                    // Table rows with click event
                     iqamasSnapshot.forEach((doc) => {
                         const iqama = doc.data();
-                        let row = "<tr>";
+                        let row = document.createElement("tr");
+                        row.classList.add("cursor-pointer", "hover:bg-gray-200");
+    
                         headers.forEach((header) => {
-                            row += `<td class="px-6 py-4 border-b">${iqama[header.key] || "غير متوفر"}</td>`;
+                            let cell = document.createElement("td");
+                            cell.classList.add("px-6", "py-4", "border-b");
+                            cell.textContent = iqama[header.key] || "غير متوفر";
+                            row.appendChild(cell);
                         });
-                        row += "</tr>";
-                        iqamasTableBody.innerHTML += row;
-                    });
+    
+                        row.addEventListener("click", () => {
+    const iqamaId = doc.id; // This is the document ID (iqamaId) from Firestore
+    window.location.href = `iqamaDetails.html?iqamaId=${iqamaId}`;
+});
 
+
+    
+                        iqamasTableBody.appendChild(row);
+                    });
+    
+                    // Show iqama table
                     document.getElementById("modiriyaContent").classList.remove("hidden");
                 }
             } catch (error) {
@@ -242,5 +267,7 @@
         });
     </script>
     
+    
 </body>
 </html>
+
