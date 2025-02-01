@@ -251,27 +251,39 @@
       document.getElementById("add-modiriya-form").addEventListener("submit", addModiriya);
       document.getElementById("add-iqama-form").addEventListener("submit", addIqama);
     });
-  
-    // Load and display modiriyas
-    async function loadModiriyas() {
-      const modiriyasSnapshot = await getDocs(query(collection(db, "modiriyas"), orderBy("name")));
-      const modiriyasTableBody = document.getElementById("modiriyas-table-body");
-      modiriyasTableBody.innerHTML = "";
-  
-      modiriyasSnapshot.forEach((docSnap) => {
-        const modiriya = docSnap.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="px-4 py-2 border">${modiriya.region}</td>
-          <td class="px-4 py-2 border">${modiriya.name}</td>
-          <td class="px-4 py-2 border">${modiriya.location}</td>
-          <td class="px-4 py-2 border">${modiriya.email}</td>
-          <td class="px-4 py-2 border">${modiriya.phone}</td>
-          <td class="px-4 py-2 border">${modiriya.password}</td> <!-- Display password -->
-        `;
-        modiriyasTableBody.appendChild(row);
-      });
-    }
+// Load and display modiriyas
+async function loadModiriyas() {
+  const modiriyasSnapshot = await getDocs(query(collection(db, "modiriyas"), orderBy("name")));
+  const modiriyasTableBody = document.getElementById("modiriyas-table-body");
+  modiriyasTableBody.innerHTML = "";
+
+  modiriyasSnapshot.forEach((docSnap) => {
+    const modiriya = docSnap.data();
+    const docId = docSnap.id; // Fetch document ID
+
+    const row = document.createElement("tr");
+    row.classList.add("bg-gray-50", "hover:bg-gray-100", "cursor-pointer");
+
+    row.innerHTML = `
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.region}</td>
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.name}</td>
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.location}</td>
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.email}</td>
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.phone}</td>
+      <td class="px-4 py-2 border text-right text-sm">${modiriya.password}</td>
+    `;
+
+    // Attach click event to row
+    row.addEventListener("click", () => {
+      window.location.href = `modiriyaDetails.html?docId=${docId}`;
+    });
+
+    modiriyasTableBody.appendChild(row);
+  });
+}
+
+
+
   
     // Load and display iqamas with modiriya name
     async function loadIqamas() {
@@ -308,6 +320,9 @@
   
     // Populate the modiriya dropdown for iqama form
     async function populateModiriyaOptions() {
+
+
+
       const modiriyasSnapshot = await getDocs(collection(db, "modiriyas"));
       const modiriyasSelect = document.getElementById("modiriya-select");
       modiriyasSelect.innerHTML = '<option value="" disabled selected>اختار المديرية</option>';
@@ -398,7 +413,7 @@ const validEmail = "iqamatidz@gmail.com";
       if (email === validEmail && password === validPassword) {
         document.getElementById("login-form").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
-        document.getElementById("error-alert").classList.add("hidden");  // Hide error alert on success
+        document.getElementById("error-alert").classList.add("hidden"); 
       } else {
         // Show error alert
         document.getElementById("error-alert").classList.remove("hidden");
@@ -411,5 +426,6 @@ const validEmail = "iqamatidz@gmail.com";
 </body>
 
 </html>
+
 
 
