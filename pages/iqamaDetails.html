@@ -69,34 +69,10 @@
 
         <!-- Workers, Students, Orders, Rooms, Clubs, and Appointments Section -->
         <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Workers Section -->
-            <div id="workersSection" class="card p-6">
+              <!-- Students Section -->
+              <div id="studentsSection" class="card p-6">
                 <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-                    <i class="fas fa-users mr-2"></i>العمال المرتبطون بالإقامة
-                </h2>
-                <div class="table-container mt-4">
-                    <table class="min-w-full bg-white rounded-lg shadow-md">
-                        <thead class="bg-orange-600 text-white">
-                            <tr>
-                                <th class="px-4 py-2 text-right">الاسم</th>
-                                <th class="px-4 py-2 text-right">القسم</th>
-                            </tr>
-                        </thead>
-                        <tbody id="workersTableBody">
-                            <!-- Rows will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="flex justify-between mt-4">
-                    <button id="prevWorkers" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
-                    <button id="nextWorkers" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
-                </div>
-            </div>
-
-            <!-- Students Section -->
-            <div id="studentsSection" class="card p-6">
-                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-                    <i class="fas fa-user-graduate mr-2"></i>الطلاب المرتبطون بالإقامة
+                    <i class="fas fa-user-graduate mr-2"></i>الطلاب المقيمين
                 </h2>
                 <div class="table-container mt-4">
                     <table class="min-w-full bg-white rounded-lg shadow-md">
@@ -116,60 +92,80 @@
                     <button id="nextStudents" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
                 </div>
             </div>
-
+             <!-- Workers Section -->
+<div id="workersSection" class="card p-6">
+    <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-users mr-2"></i>عمال الإقامة
+    </h2>
+    <div class="table-container mt-4">
+        <table class="min-w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-orange-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-right">الاسم</th>
+                    <th class="px-4 py-2 text-right">القسم</th>
+                </tr>
+            </thead>
+            <tbody id="workersTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+                <div class="flex justify-between mt-4">
+                    <button id="prevWorkers" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+                    <button id="nextWorkers" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+                </div>
+            </div>
             <!-- Orders Section -->
-            <div id="ordersSection" class="card p-6">
-                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-                    <i class="fas fa-utensils mr-2"></i>الطلبات اليومية
-                </h2>
-                <div class="table-container mt-4">
-                    <table class="min-w-full bg-white rounded-lg shadow-md">
-                        <thead class="bg-orange-600 text-white">
-                            <tr>
-                                <th class="px-4 py-2 text-right">رقم الطالب</th>
-                                <th class="px-4 py-2 text-right">نوع الطعام</th>
-                                <th class="px-4 py-2 text-right">تاريخ الطلب</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ordersTableBody">
-                            <!-- Rows will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="flex justify-between mt-4">
-                    <button id="prevOrders" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
-                    <button id="nextOrders" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
-                </div>
+<div id="ordersSection" class="card p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto mt-6">
+    <h2 class="text-2xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-utensils mr-2"></i> الطلبات اليومية
+    </h2>
+    <!-- Total Orders Count -->
+    <div class="flex justify-center mt-4 mb-6">
+        <div class="text-lg text-gray-700 font-medium">
+       
+            <div id="totalOrdersCount" class="text-3xl font-bold text-orange-600">
+                <p>إفطار: <span id="breakfastCount">0</span></p>
+                <p>غداء: <span id="lunchCount">0</span></p>
+                <p>عشاء: <span id="dinnerCount">0</span></p>
             </div>
+        </div>
+    </div>
+  
 
-            <!-- Rooms Section -->
-            <div id="roomsSection" class="card p-6">
-                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-                    <i class="fas fa-bed mr-2"></i>عدد الغرف المرتبطة بالإقامة
-                </h2>
-                <div class="table-container mt-4">
-                    <table class="min-w-full bg-white rounded-lg shadow-md">
-                        <thead class="bg-orange-600 text-white">
-                            <tr>
-                                <th class="px-4 py-2 text-right">رقم الغرفة</th>
-                                <th class="px-4 py-2 text-right">عدد الغرف</th>
-                            </tr>
-                        </thead>
-                        <tbody id="roomsTableBody">
-                            <!-- Rows will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="flex justify-between mt-4">
-                    <button id="prevRoom" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">التالي</button>
-                    <button id="nextRoom" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
-                </div>
-            </div>
+</div>
 
-<!-- Clubs Section -->
+<!-- Rooms Section -->
+<div id="roomsSection" class="card p-6">
+    <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-bed mr-2"></i>غرف الإقامة
+    </h2>
+    <div class="table-container mt-4">
+        <table class="min-w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-orange-600 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-right">رقم الغرفة</th>
+                    <th class="px-4 py-2 text-right">عدد الطلاب في الغرفة</th> <!-- Updated title -->
+                </tr>
+            </thead>
+            <tbody id="roomsTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    <div class="flex justify-between mt-4">
+        <button id="prevRoom" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
+        <button id="nextRoom" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
+    </div>
+</div>
+
+
+
+
+         <!-- Clubs Section -->
 <div id="clubsSection" class="card p-6">
     <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-        <i class="fas fa-futbol mr-2"></i>الأندية المرتبطة بالإقامة
+        <i class="fas fa-futbol mr-2"></i>أندية الإقامة
     </h2>
     <div class="table-container mt-4">
         <table class="min-w-full bg-white rounded-lg shadow-md">
@@ -198,44 +194,16 @@
         </div>
     </div>
 </div>
-
-
-            <!-- Appointments Section -->
-            <div id="appointmentsSection" class="card p-6">
-                <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-                    <i class="fas fa-calendar-check mr-2"></i>المواعيد الطبية
-                </h2>
-                <div class="table-container mt-4">
-                    <table class="min-w-full bg-white rounded-lg shadow-md">
-                        <thead class="bg-orange-600 text-white">
-                            <tr>
-                                <th class="px-4 py-2 text-right">رقم الطالب</th>
-                                <th class="px-4 py-2 text-right">تاريخ الموعد</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appointmentsTableBody">
-                            <!-- Rows will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="flex justify-between mt-4">
-                    <button id="prevAppointments" class="bg-orange-600 text-white px-4 py-2 rounded disabled:opacity-50">السابق</button>
-                    <button id="nextAppointments" class="bg-orange-600 text-white px-4 py-2 rounded">التالي</button>
-                </div>
-            </div>
-        </div>
-    </div>
- 
-    <div id="eventsSection" class="card p-6 max-w-md mx-auto">
-
+<div id="eventsSection" class="card p-6 ">
     <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
-        <i class="fas fa-calendar mr-2"></i>الفعاليات
+        <i class="fas fa-calendar mr-2"></i>فعاليات الإقامة
     </h2>
     <div class="table-container mt-4">
         <table class="min-w-full bg-white rounded-lg shadow-md">
             <thead class="bg-orange-600 text-white">
                 <tr>
                     <th class="px-4 py-2 text-right">اسم الفعالية</th>
+                    <th class="px-4 py-2 text-right">تاريخ الفعالية</th>
                 </tr>
             </thead>
             <tbody id="eventsTableBody">
@@ -250,6 +218,24 @@
 </div>
 
 
+
+
+
+<!-- Appointments Section -->
+<div id="appointmentsSection" class="card p-6">
+    <h2 class="text-xl font-semibold text-orange-600 text-center mb-4">
+        <i class="fas fa-calendar-check mr-2"></i>المتابعة الصحية في الإقامة
+    </h2>
+    <div class="mt-4">
+        <p class="text-lg text-center">
+            إجمالي عدد المواعيد: <span id="appointmentsCount">0</span>
+        </p>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -271,10 +257,10 @@ const db = getFirestore(app);
     // Get the iqamaId from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const iqamaId = urlParams.get('iqamaId');
-
+    let studentsPage = 0;
     // Pagination Variables
     let workersPage = 0;
-    let studentsPage = 0;
+
     const rowsPerPage = 5;
 
     if (iqamaId) {
@@ -298,35 +284,68 @@ const db = getFirestore(app);
             });
 
         // Fetch Workers
-        getDocs(query(collection(db, "workers"), where("iqamaId", "==", iqamaId)))
-            .then((workersSnapshot) => {
-                const workersTableBody = document.getElementById("workersTableBody");
-                const workersData = workersSnapshot.docs.map(doc => doc.data());
+getDocs(query(collection(db, "workers"), where("iqamaId", "==", iqamaId)))
+    .then((workersSnapshot) => {
+        const workersTableBody = document.getElementById("workersTableBody");
+        const workersData = workersSnapshot.docs.map(doc => doc.data());
 
-                function displayWorkers() {
-                    workersTableBody.innerHTML = "";
-                    const pageWorkers = workersData.slice(workersPage * rowsPerPage, (workersPage + 1) * rowsPerPage);
+        // Group workers by department
+        const workersByDepartment = workersData.reduce((acc, worker) => {
+            const department = worker.department || "غير متوفر";
+            if (!acc[department]) {
+                acc[department] = [];
+            }
+            acc[department].push(worker);
+            return acc;
+        }, {});
 
-                    pageWorkers.forEach(worker => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td class="px-4 py-2 border-b">${worker.name || "غير متوفر"}</td>
-                            <td class="px-4 py-2 border-b">${worker.department || "غير متوفر"}</td>`;
-                        workersTableBody.appendChild(row);
-                    });
+        function displayWorkers() {
+            workersTableBody.innerHTML = "";
+            const departments = Object.keys(workersByDepartment);
+            const pageDepartments = departments.slice(workersPage * rowsPerPage, (workersPage + 1) * rowsPerPage);
 
-                    document.getElementById("prevWorkers").disabled = workersPage === 0;
-                    document.getElementById("nextWorkers").disabled = workersPage >= Math.ceil(workersData.length / rowsPerPage) - 1;
-                }
+            pageDepartments.forEach(department => {
+                // Create a row for the department
+                const departmentRow = document.createElement("tr");
+                departmentRow.innerHTML = `<td colspan="2" class="bg-gray-200 text-center text-lg py-2">${department}</td>`;
+                workersTableBody.appendChild(departmentRow);
 
-                displayWorkers();
-
-                document.getElementById("nextWorkers").onclick = () => { if (workersPage < Math.ceil(workersData.length / rowsPerPage) - 1) { workersPage++; displayWorkers(); } };
-                document.getElementById("prevWorkers").onclick = () => { if (workersPage > 0) { workersPage--; displayWorkers(); } };
-            })
-            .catch((error) => {
-                console.error("Error fetching workers:", error);
+                // Create rows for each worker in the department
+                workersByDepartment[department].forEach(worker => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td class="px-4 py-2 border-b">${worker.name || "غير متوفر"}</td>
+                        <td class="px-4 py-2 border-b">${worker.department || "غير متوفر"}</td>`;
+                    workersTableBody.appendChild(row);
+                });
             });
+
+            // Disable/Enable pagination buttons based on the current page
+            document.getElementById("prevWorkers").disabled = workersPage === 0;
+            document.getElementById("nextWorkers").disabled = workersPage >= Math.ceil(departments.length / rowsPerPage) - 1;
+        }
+
+        displayWorkers();
+
+        // Pagination Logic
+        document.getElementById("nextWorkers").onclick = () => {
+            if (workersPage < Math.ceil(Object.keys(workersByDepartment).length / rowsPerPage) - 1) {
+                workersPage++;
+                displayWorkers();
+            }
+        };
+
+        document.getElementById("prevWorkers").onclick = () => {
+            if (workersPage > 0) {
+                workersPage--;
+                displayWorkers();
+            }
+        };
+    })
+    .catch((error) => {
+        console.error("Error fetching workers:", error);
+    });
+
 
         // Fetch Students
         getDocs(query(collection(db, "students"), where("iqamaId", "==", iqamaId)))
@@ -358,91 +377,47 @@ const db = getFirestore(app);
             .catch((error) => {
                 console.error("Error fetching students:", error);
             });
-let currentPage = 0;  // Move the initialization here to avoid scope issues
-const itemsPerPage = 5; // Maximum rows per page
 
-try {
+  
+
+    try {
+    const iqamaId = urlParams.get('iqamaId'); // iqamaId is already available
+
+    // Fetch orders from Firestore, filtered by orderIqamaId
     const ordersSnapshot = await getDocs(query(collection(db, "orders"), where("orderIqamaId", "==", iqamaId)));
 
-    const ordersTableBody = document.getElementById("ordersTableBody");
-    ordersTableBody.innerHTML = ""; // Clear previous content
+    // Initialize counters for each food type
+    let breakfastCount = 0;
+    let lunchCount = 0;
+    let dinnerCount = 0;
 
-    let ordersData = [];
-    let hasOrders = false;
-
-    // Extract order data
+    // Loop through orders to count the number of each food type
     ordersSnapshot.forEach((doc) => {
         const order = doc.data();
-        const orderDate = order.orderDate?.toDate(); // Convert Firestore timestamp
-        const formattedOrderDate = orderDate ? orderDate.toISOString().split("T")[0] : "غير متوفر";
+        const foodType = order.orderFoodType; // Food type field
 
-        console.log("Order Data:", order);
-        console.log("Order Date:", formattedOrderDate);
-
-        ordersData.push({
-            matricule: order.orderStudentMatricule || "غير متوفر",
-            foodType: order.orderFoodType || "غير متوفر",
-            orderDate: formattedOrderDate
-        });
-
-        hasOrders = true;
-    });
-
-    // Function to display orders for the current page
-    function displayOrders() {
-        ordersTableBody.innerHTML = ""; // Clear previous rows
-
-        // Calculate the range of orders to display
-        const startIndex = currentPage * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const currentOrders = ordersData.slice(startIndex, endIndex);
-
-        // Loop through the current page's orders and add them to the table
-        currentOrders.forEach(order => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td class="px-4 py-2 border-b text-right">${order.matricule}</td>
-                <td class="px-4 py-2 border-b text-right">${order.foodType}</td>
-                <td class="px-4 py-2 border-b text-right">${order.orderDate}</td>`;
-            ordersTableBody.appendChild(row);
-        });
-
-        // If no orders, display a message
-        if (!hasOrders) {
-            ordersTableBody.innerHTML = "<tr><td colspan='3' class='text-center py-4'>لا توجد طلبات.</td></tr>";
-        }
-
-        // Disable/Enable the Next and Previous buttons based on the current page
-        document.getElementById("prevOrders").disabled = currentPage === 0;
-        document.getElementById("nextOrders").disabled = currentPage >= Math.ceil(ordersData.length / itemsPerPage) - 1;
-    }
-
-    // Initial display of orders
-    displayOrders();
-
-    // Add event listeners for Next and Previous buttons
-    document.getElementById("prevOrders").addEventListener("click", () => {
-        if (currentPage > 0) {
-            currentPage--;
-            displayOrders();
-        }
-    });    
-
-    document.getElementById("nextOrders").addEventListener("click", () => {
-        if (currentPage < Math.ceil(ordersData.length / itemsPerPage) - 1) {
-            currentPage++;
-            displayOrders();
+        if (foodType === "وجبة الفطور") {
+            breakfastCount++;
+        } else if (foodType === "وجبة الغداء") {
+            lunchCount++;
+        } else if (foodType === "وجبة العشاء") {
+            dinnerCount++;
         }
     });
+
+    // Update the total counts in the UI
+    document.getElementById("breakfastCount").textContent = breakfastCount;
+    document.getElementById("lunchCount").textContent = lunchCount;
+    document.getElementById("dinnerCount").textContent = dinnerCount;
 
 } catch (error) {
     console.error("Error fetching orders:", error);
-    document.getElementById("ordersTableBody").innerHTML = "<tr><td colspan='3' class='text-center py-4'>حدث خطأ أثناء تحميل الطلبات.</td></tr>";
-}}
+    document.getElementById("totalOrdersCount").textContent = "حدث خطأ أثناء تحميل الطلبات.";
+}
 
+    }
 let currentRoomPage = 0; // Page counter
 const roomsPerPage = 5;  // Number of rooms per page
-
 // Function to fetch room data and display it in the table
 async function fetchRoomData(iqamaId) {
     const roomsTableBody = document.getElementById('roomsTableBody');
@@ -454,16 +429,18 @@ async function fetchRoomData(iqamaId) {
         // Get the documents from the query
         const querySnapshot = await getDocs(q);
 
-        // Create an object to store room numbers and counts
+        // Create an object to store room numbers and total student counts
         const rooms = {};
 
         querySnapshot.forEach(doc => {
             const roomNumber = doc.data().roomNumber;
-            // Increment the room count if it already exists, or initialize it if not
+            const studentCount = doc.data().studentCount || 0;  // Default to 0 if no studentCount is found
+            
+            // Increment the room's student count
             if (rooms[roomNumber]) {
-                rooms[roomNumber]++;
+                rooms[roomNumber] += studentCount;
             } else {
-                rooms[roomNumber] = 1;
+                rooms[roomNumber] = studentCount;
             }
         });
 
@@ -478,12 +455,12 @@ async function fetchRoomData(iqamaId) {
         // Clear previous rows in the table body
         roomsTableBody.innerHTML = '';
 
-        // Loop through the roomsToDisplay array and display the room numbers and counts in the table
-        roomsToDisplay.forEach(([roomNumber, count]) => {
+        // Loop through the roomsToDisplay array and display the room numbers and student counts in the table
+        roomsToDisplay.forEach(([roomNumber, totalStudents]) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="px-4 py-2 text-right">${roomNumber}</td>
-                <td class="px-4 py-2 text-right">${count}</td>
+                <td class="px-4 py-2 text-right">${totalStudents}</td>
             `;
             roomsTableBody.appendChild(row);
         });
@@ -512,7 +489,6 @@ document.getElementById('nextRoom').addEventListener('click', () => {
 
 // Assuming iqamaId is already available in the global context, call the function initially
 fetchRoomData(iqamaId); // Call with the iqamaId for filtering
-
 
 
 let currentClubPage = 0;  // Page counter for clubs
@@ -598,66 +574,25 @@ const itemsPerPage = 5; // Maximum rows per page
 
 getDocs(query(collection(db, "appoitments"), where("iqamaId", "==", iqamaId)))
     .then((appointmentsSnapshot) => {
-        const appointmentsTableBody = document.getElementById("appointmentsTableBody");
-        const appointmentsData = appointmentsSnapshot.docs.map(doc => {
-            const data = doc.data();
-            console.log(data); // Log each document to inspect its fields
-            return data;
-        });
+        // Count the total number of appointments
+        const totalAppointments = appointmentsSnapshot.size;
 
-        // Function to display appointments for the current page
-        function displayAppointments() {
-            appointmentsTableBody.innerHTML = ""; // Clear previous rows
-
-            // Calculate the range of appointments to display
-            const startIndex = currentPage * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const currentAppointments = appointmentsData.slice(startIndex, endIndex);
-
-            // Loop through the current page's appointments and add them to the table
-            currentAppointments.forEach(appointment => {
-                console.log("Appointment Date:", appointment.appoitmentDate); // Fix typo
-
-                const appointmentDate = appointment.appoitmentDate || "غير متوفر"; // Default if no date
-
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td class="px-4 py-2 border-b text-right">${appointment.matricule || "غير متوفر"}</td>
-                    <td class="px-4 py-2 border-b text-right">${appointmentDate}</td>`;
-                appointmentsTableBody.appendChild(row);
-            });
-
-            // Disable/Enable the Next and Previous buttons based on the current page
-            document.getElementById("prevAppointments").disabled = currentPage === 0;
-            document.getElementById("nextAppointments").disabled = currentPage >= Math.ceil(appointmentsData.length / itemsPerPage) - 1;
-        }
-
-        // Initial display of appointments
-        displayAppointments();
-
-        // Add event listeners for Next and Previous buttons
-        document.getElementById("prevAppointments").addEventListener("click", () => {
-            if (currentPage > 0) {
-                currentPage--;
-                displayAppointments();
-            }
-        });
-
-        document.getElementById("nextAppointments").addEventListener("click", () => {
-            if (currentPage < Math.ceil(appointmentsData.length / itemsPerPage) - 1) {
-                currentPage++;
-                displayAppointments();
-            }
-        });
-
+        // Update the total count in the UI
+        document.getElementById("appointmentsCount").textContent = totalAppointments;
     })
     .catch((error) => {
         console.error("Error fetching appointments:", error);
-        document.getElementById("appointmentsTableBody").innerHTML = "<tr><td colspan='2' class='text-center py-4'>حدث خطأ أثناء تحميل المواعيد.</td></tr>";
+        document.getElementById("appointmentsCount").textContent = "حدث خطأ أثناء تحميل المواعيد.";
     });
+
+
+
+
+
+
+
     let currentEventPage = 0;  // Page counter for events
 const eventsPerPage = 5;   // Number of events per page
-
 // Function to fetch events from the "faaliyats" collection for a specific iqamaId
 async function fetchEvents(iqamaId) {
     console.log("Fetching events for iqamaId:", iqamaId);
@@ -680,7 +615,7 @@ async function fetchEvents(iqamaId) {
       if (eventsSnapshot.empty) {
         console.log("No events found for this IQAMA.");
         eventsTableBody.innerHTML = `<tr>
-          <td colspan="1" class="text-center py-4">لا توجد فعاليات.</td>
+          <td colspan="2" class="text-center py-4">لا توجد فعاليات.</td>
         </tr>`;
         // Disable pagination buttons since there is nothing to paginate
         document.getElementById("prevEvents").disabled = true;
@@ -700,14 +635,21 @@ async function fetchEvents(iqamaId) {
       if (eventsToDisplay.length === 0) {
         console.log("No events to display on this page.");
         eventsTableBody.innerHTML = `<tr>
-          <td colspan="1" class="text-center py-4">لا توجد فعاليات.</td>
+          <td colspan="2" class="text-center py-4">لا توجد فعاليات.</td>
         </tr>`;
       } else {
         // Loop over events and add them to the table
         eventsToDisplay.forEach(event => {
           console.log("Event Data:", event);
           const row = document.createElement("tr");
-          row.innerHTML = `<td class="px-4 py-2 border-b text-right">${event.faaliyatPostText || "لا توجد فعاليات"}</td>`;
+
+          // Convert the faaliyatPostDate timestamp to a readable date format
+          const eventDate = event.faaliyatPostDate ? event.faaliyatPostDate.toDate().toLocaleDateString('ar-EG') : "تاريخ غير متوفر";
+
+          row.innerHTML = `
+            <td class="px-4 py-2 border-b text-right">${event.faaliyatPostText || "لا توجد فعاليات"}</td>
+            <td class="px-4 py-2 border-b text-right">${eventDate}</td>
+          `;
           eventsTableBody.appendChild(row);
         });
       }
@@ -740,6 +682,7 @@ async function fetchEvents(iqamaId) {
     currentEventPage++;
     fetchEvents(iqamaId);
   });
+
 </script>
 </body>
 </html>
