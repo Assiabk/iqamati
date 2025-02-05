@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
@@ -18,6 +18,7 @@
                         <th class="px-4 py-2 border">اسم الطالب</th>
                         <th class="px-4 py-2 border">نص الطلب</th>
                         <th class="px-4 py-2 border">الحالة</th>
+                        <th class="px-4 py-2 border">حالة التحقق</th> <!-- New column for verification status -->
                         <th class="px-4 py-2 border">الإجراءات</th>
                     </tr>
                 </thead>
@@ -31,7 +32,7 @@
     <!-- Firebase configuration and logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, getDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, getDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -47,60 +48,69 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to update request status
+        // Function to update request status and remove from UI
         async function updateRequest(docId, isAccepted) {
-            console.log("updateRequest function called with docId:", docId, "and isAccepted:", isAccepted);  // Debugging
+            console.log("Updating request:", docId, "Status:", isAccepted);
 
-            const requestDocRef = doc(db, "talabTaghyir", docId); // Document reference
-            console.log("Document reference:", requestDocRef);  // Debugging
+            const requestDocRef = doc(db, "talabTaghyir", docId);
 
             try {
-                // Get the current data in the document before updating
-                const docSnap = await getDoc(requestDocRef); // Use getDoc for fetching a single document
+                const docSnap = await getDoc(requestDocRef);
                 if (docSnap.exists()) {
-                    console.log("Current document data:", docSnap.data());  // Debugging
+                    await updateDoc(requestDocRef, { talabTaghyirIsAccepted: isAccepted, isVerified: true });
 
-                    const currentData = docSnap.data();
+                    alert(`تم ${isAccepted ? "قبول" : "رفض"} الطلب. تم التحقق من قبل الادارة.`);
 
-                    // Ensure that talabTaghyirIsAccepted field is not null or undefined
-                    if (currentData.hasOwnProperty('talabTaghyirIsAccepted')) {
-                        console.log("Field found, updating to:", isAccepted);  // Debugging
-
-                        // Update the talabTaghyirIsAccepted field
-                        await updateDoc(requestDocRef, {
-                            talabTaghyirIsAccepted: isAccepted,
-                        });
-
-                        console.log("Document updated successfully.");  // Debugging
-                        alert(`تم ${isAccepted ? "قبول" : "رفض"} الطلب.`);
-                        fetchRequests(); // Refresh the list
-                    } else {
-                        console.log("Field 'talabTaghyirIsAccepted' not found in the document.");  // Debugging
+                    // Update verification status in the table
+                    const row = document.getElementById(`row-${docId}`);
+                    if (row) {
+                        const verificationCell = row.querySelector('.verification-status');
+                        if (verificationCell) {
+                            verificationCell.textContent = "تم التحقق"; // Update the status in the table
+                        }
                     }
                 } else {
-                    console.log("No such document!");  // Debugging
+                    console.log("No such document!");
                 }
             } catch (error) {
-                console.error("Error updating request:", error);  // Debugging
+                console.error("Error updating request:", error);
                 alert("فشل تحديث الطلب.");
             }
         }
 
-        // Function to fetch requests for the current iqamaId
+        // Function to delete a request
+        async function deleteRequest(docId) {
+            console.log("Deleting request:", docId);
+
+            const requestDocRef = doc(db, "talabTaghyir", docId);
+
+            try {
+                await deleteDoc(requestDocRef);
+                alert("تم حذف الطلب.");
+                
+                // Remove the row from the UI
+                const row = document.getElementById(`row-${docId}`);
+                if (row) {
+                    row.remove();
+                }
+            } catch (error) {
+                console.error("Error deleting request:", error);
+                alert("فشل حذف الطلب.");
+            }
+        }
+
+        // Function to fetch requests
         async function fetchRequests() {
-            console.log("Fetching requests...");  // Debugging
+            console.log("Fetching requests...");
             const requestsTable = document.getElementById("requestsTableBody");
-            requestsTable.innerHTML = ''; // Clear current table data
+            requestsTable.innerHTML = ''; // Clear table
 
-            const iqamaId = localStorage.getItem('iqamaId'); // Get the iqamaId from localStorage
-            console.log("Current iqamaId:", iqamaId);  // Debugging
-
+            const iqamaId = localStorage.getItem('iqamaId');
             if (!iqamaId) {
                 alert("لم تقم بتسجيل الدخول.");
                 return;
             }
 
-            // Filter requests for the current iqamaId
             const talabTaghyirCollection = collection(db, "talabTaghyir");
             const querySnapshot = await getDocs(query(talabTaghyirCollection, where("iqamaId", "==", iqamaId)));
 
@@ -109,35 +119,30 @@
                 const docId = doc.id;
 
                 const row = document.createElement("tr");
+                row.id = `row-${docId}`; // Unique ID for easy removal
 
-                // Exclude iqamaId from being displayed in the table
                 row.innerHTML = `
                     <td class="px-4 py-2 border">${request.studentName}</td>
                     <td class="px-4 py-2 border">${request.talabTaghyirText}</td>
                     <td class="px-4 py-2 border">${request.talabTaghyirIsAccepted ? "مقبول" : "مرفوض"}</td>
+                    <td class="px-4 py-2 border verification-status">${request.isVerified ? "تم التحقق" : "لم يتم التحقق"}</td> <!-- Verification Status column -->
                     <td class="px-4 py-2 border text-center">
                         <button class="bg-green-500 text-white px-4 py-2 rounded" id="accept-${docId}">قبول</button>
                         <button class="bg-red-500 text-white px-4 py-2 rounded ml-2" id="reject-${docId}">رفض</button>
+                        <button class="bg-gray-500 text-white px-4 py-2 rounded ml-2" id="delete-${docId}">حذف</button>
                     </td>
                 `;
                 requestsTable.appendChild(row);
 
-                // Attach event listeners programmatically
-                document.getElementById(`accept-${docId}`).addEventListener("click", () => {
-                    updateRequest(docId, true);  // Accept request
-                });
-
-                document.getElementById(`reject-${docId}`).addEventListener("click", () => {
-                    updateRequest(docId, false);  // Reject request
-                });
+                // Attach event listeners
+                document.getElementById(`accept-${docId}`).addEventListener("click", () => updateRequest(docId, true));
+                document.getElementById(`reject-${docId}`).addEventListener("click", () => updateRequest(docId, false));
+                document.getElementById(`delete-${docId}`).addEventListener("click", () => deleteRequest(docId));
             });
         }
 
-        // Fetch requests when the page loads
-        window.onload = function() {
-            console.log("window.onload triggered");
-            fetchRequests();
-        };
+        // Fetch requests on page load
+        window.onload = fetchRequests;
     </script>
 </body>
 </html>
