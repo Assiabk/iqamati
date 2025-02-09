@@ -166,7 +166,24 @@
             </div>
         </div>
     </div>
-
+    <div id="daily-tasks-container" class="bg-white shadow-md rounded-lg p-4 max-w-3xl mx-auto">
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">مهام العمال </h2>
+        <div class="overflow-x-auto w-full">
+          <table class="min-w-full table-auto border-collapse">
+            <thead>
+              <tr>
+                <th class="border px-2 py-1 text-gray-600 text-sm">اسم العامل</th>
+                <th class="border px-2 py-1 text-gray-600 text-sm">المهمة</th>
+                <th class="border px-2 py-1 text-gray-600 text-sm">المدة</th>
+              </tr>
+            </thead>
+            <tbody id="tasks-tbody">
+              <!-- Fetched task rows will appear here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -188,7 +205,9 @@
         // Global variables
         let currentWorkerId = null;
         let isAscending = true; // Sort order (ascending/descending)
-       document.getElementById('worker-form').addEventListener('submit', async (e) => {
+        
+       
+        document.getElementById('worker-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name = document.getElementById('worker-name').value;
@@ -251,9 +270,9 @@
     displayWorkerList();
 });
 
-        
-             
-        
+
+
+
         // Show success alert
         function showSuccessAlert(message) {
             const alert = document.getElementById('success-alert');
@@ -570,6 +589,49 @@ window.deleteProgram = async function (id) {
 
         displayWorkerList();
         displayProgramList();
+ // Retrieve iqamaID from localStorage and log it for debugging
+ const iqamaId = localStorage.getItem('iqamaId');
+  console.log("Retrieved iqamaId:", iqamaId);
+
+  // Reference to the table body where tasks will be appended
+  const tasksTbody = document.getElementById("tasks-tbody");
+
+  async function fetchWorkerTasks() {
+    try {
+      // Query the worker_tasks collection filtering by the stored iqamaID
+      const tasksQuery = query(
+        collection(db, "worker_tasks"),
+        where("iqamaId", "==", iqamaId)
+      );
+      const querySnapshot = await getDocs(tasksQuery);
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log("Fetched document data:", data);
+        
+        // Retrieve the work time field as a number of hours
+        let workTimeValue = data.workTime || data.WorkTime || "";
+        // Optionally, append " ساعة" (hour) if desired
+        let displayWorkTime = workTimeValue ? workTimeValue + " ساعة" : "";
+        
+        // Create a new table row for the fetched task
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="border px-2 py-1 text-gray-600 text-sm">${data.workerName || ""}</td>
+          <td class="border px-2 py-1 text-gray-600 text-sm">${data.dailyWork || ""}</td>
+          <td class="border px-2 py-1 text-gray-600 text-sm">${displayWorkTime}</td>
+        `;
+        tasksTbody.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Error fetching worker tasks:", error);
+    }
+  }
+
+  // Fetch tasks as soon as the script loads
+  fetchWorkerTasks();
+
+
         </script>
         
 </body>
