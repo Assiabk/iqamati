@@ -20,7 +20,7 @@
             transform: translateY(-5px);
         }
         .table-container {
-            max-height: 250px; /* Limit the height of the table */
+            max-height: 250px; 
             overflow-y: auto;
         }
     </style>
@@ -116,24 +116,28 @@
                 </div>
             </div>
             <!-- Orders Section -->
-<div id="ordersSection" class="card p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto mt-6">
-    <h2 class="text-2xl font-semibold text-orange-600 text-center mb-4">
-        <i class="fas fa-utensils mr-2"></i> الطلبات اليومية
-    </h2>
-    <!-- Total Orders Count -->
-    <div class="flex justify-center mt-4 mb-6">
-        <div class="text-lg text-gray-700 font-medium">
-       
-            <div id="totalOrdersCount" class="text-3xl font-bold text-orange-600">
-                <p>وجبة الفطور <span id="breakfastCount">0</span></p>
-                <p> وجبةالغذاء: <span id="lunchCount">0</span></p>
-                <p>وجبة العشاء: <span id="dinnerCount">0</span></p>
+            <div id="ordersSection" class="card p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto mt-6">
+                <h2 class="text-2xl font-semibold text-orange-600 text-center mb-4">
+                    <i class="fas fa-utensils mr-2"></i> الطلبات اليومية
+                </h2>
+                
+                <!-- Date Picker for selecting a day -->
+                <div class="flex justify-center mb-4">
+                    <input type="date" id="orderDatePicker" class="border p-2 rounded" />
+                </div>
+            
+                <!-- Total Orders Count -->
+                <div class="flex justify-center mt-4 mb-6">
+                    <div class="text-lg text-gray-700 font-medium">
+                        <div id="totalOrdersCount" class="text-3xl font-bold text-orange-600">
+                            <p>وجبة الفطور: <span id="breakfastCount">0</span></p>
+                            <p>وجبة الغذاء: <span id="lunchCount">0</span></p>
+                            <p>وجبة العشاء: <span id="dinnerCount">0</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-  
-
-</div>
+            
 
 <!-- Rooms Section -->
 <div id="roomsSection" class="card p-6">
@@ -238,8 +242,7 @@
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
+import { getFirestore, doc, getDoc, collection, query, where, getDocs,Timestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyATEvJ8NTCbzgBigVvLHBY78gEsnyibev0",
@@ -377,45 +380,89 @@ getDocs(query(collection(db, "workers"), where("iqamaId", "==", iqamaId)))
             .catch((error) => {
                 console.error("Error fetching students:", error);
             });
+        }
+    
+        async function fetchOrdersForDate(selectedDate) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const iqamaId = urlParams.get('iqamaId');
+    if (!iqamaId) {
+        console.error("Missing iqamaId");
+        return;
+    }
 
-  
+    // Define start and end of the day
+    const startOfDay = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate()
+    );
+    const endOfDay = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        23, 59, 59
+    );
+
+    // Convert to Firestore Timestamps
+    const startTimestamp = Timestamp.fromDate(startOfDay);
+    const endTimestamp = Timestamp.fromDate(endOfDay);
+
+    console.log("Fetching orders for:", selectedDate);
+    console.log("Start Timestamp:", startTimestamp);
+    console.log("End Timestamp:", endTimestamp);
+
+    // Build the Firestore query
+    const ordersRef = collection(db, "orders");
+    const ordersQuery = query(
+        ordersRef,
+        where("orderIqamaId", "==", iqamaId),
+        where("orderDate", ">=", startTimestamp),
+        where("orderDate", "<=", endTimestamp)
+    );
 
     try {
-    const iqamaId = urlParams.get('iqamaId'); // iqamaId is already available
+        const ordersSnapshot = await getDocs(ordersQuery);
+        console.log("Total orders found:", ordersSnapshot.size);
 
-    // Fetch orders from Firestore, filtered by orderIqamaId
-    const ordersSnapshot = await getDocs(query(collection(db, "orders"), where("orderIqamaId", "==", iqamaId)));
+        let breakfastCount = 0;
+        let lunchCount = 0;
+        let dinnerCount = 0;
 
-    // Initialize counters for each food type
-    let breakfastCount = 0;
-    let lunchCount = 0;
-    let dinnerCount = 0;
+        ordersSnapshot.forEach((doc) => {
+            const order = doc.data();
+            console.log("Fetched Order:", order); // Debugging each order
+            const foodType = order.orderFoodType;
+            if (foodType === "وجبة الفطور") {
+                breakfastCount++;
+            } else if (foodType === "وجبة الغداء") {
+                lunchCount++;
+            } else if (foodType === "وجبة العشاء") {
+                dinnerCount++;
+            }
+        });
 
-    // Loop through orders to count the number of each food type
-    ordersSnapshot.forEach((doc) => {
-        const order = doc.data();
-        const foodType = order.orderFoodType; // Food type field
+        console.log("Breakfast Count:", breakfastCount);
+        console.log("Lunch Count:", lunchCount);
+        console.log("Dinner Count:", dinnerCount);
 
-        if (foodType === "وجبة الفطور") {
-            breakfastCount++;
-        } else if (foodType === "وجبة الغداء") {
-            lunchCount++;
-        } else if (foodType === "وجبة العشاء") {
-            dinnerCount++;
-        }
-    });
-
-    // Update the total counts in the UI
-    document.getElementById("breakfastCount").textContent = breakfastCount;
-    document.getElementById("lunchCount").textContent = lunchCount;
-    document.getElementById("dinnerCount").textContent = dinnerCount;
-
-} catch (error) {
-    console.error("Error fetching orders:", error);
-    document.getElementById("totalOrdersCount").textContent = "حدث خطأ أثناء تحميل الطلبات.";
+        // Update UI
+        document.getElementById("breakfastCount").textContent = breakfastCount;
+        document.getElementById("lunchCount").textContent = lunchCount;
+        document.getElementById("dinnerCount").textContent = dinnerCount;
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        document.getElementById("totalOrdersCount").textContent = "حدث خطأ أثناء تحميل الطلبات.";
+    }
 }
 
+// Event listener for date picker input
+document.getElementById("orderDatePicker").addEventListener("change", (e) => {
+    const selectedDateStr = e.target.value;
+    if (selectedDateStr) {
+        const selectedDate = new Date(selectedDateStr);
+        fetchOrdersForDate(selectedDate);
     }
+});
 let currentRoomPage = 0; // Page counter
 const roomsPerPage = 5;  // Number of rooms per page
 // Function to fetch room data and display it in the table
