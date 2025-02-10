@@ -73,10 +73,10 @@
                 document.getElementById(`loading-${cardId}`).style.display = 'none';
             };
 
-            reader.readAsDataURL(file); // This converts the image file to base64
+            reader.readAsDataURL(file); 
         };
 
-        // Function to navigate to another page
+
         window.navigateToPage = function(url) {
             window.location.href = url;
         };
@@ -85,71 +85,75 @@
     <title>إدارة اقامتي</title>
 </head>
 
-<body class="bg-gray-100">
-    <header class="text-gray-800 py-8 shadow-lg bg-white relative h-52">
+<body class="bg-gray-100"> 
+    <header class="text-gray-800 py-8 shadow-lg bg-white relative h-52"> 
+        <div class="max-w-7xl mx-auto px-4 text-center"> 
+            <div class="flex justify-center items-center h-full"> 
+                <img src="pages/images/iqama_logo.jpg" style="opacity: 0.1; width: 100%;" class="h-40 object-contain">
+
+
+            </div> 
+        </div> 
+    </header> 
+ 
+    <div class="max-w-7xl mx-auto px-4 mt-12"> 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> 
+            <!-- Card 1 --> 
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out"> 
+                <div class="relative"> 
+                    <img id="img-card1" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card1')"> 
+                    <input type="file" id="file-card1" class="hidden" accept="image/*" onchange="uploadImage('card1')"> 
+                    <div id="loading-card1" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div> 
+                </div> 
+                <div class="p-6 text-center"> 
+                    <h2 class="card-title mb-2">الديوان الوطني للخدمات الجامعية</h2> 
+                    <p class="card-description mb-4"> 
+                        يمكنك هنا الإشراف والإطلاع على سيرورة الخدمات الجامعية في المديرات والإقامات الجامعية 
+                    </p> 
+                    <button class="btn-primary w-full" onclick="navigateToPage('pages/diwane.html')">دخول</button> 
+                </div> 
+                 
+            </div> 
+ 
+            <!-- Card 2 --> 
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out"> 
+                <div class="relative"> 
+                    <img id="img-card2" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card2')"> 
+                    <input type="file" id="file-card2" class="hidden" accept="image/*" onchange="uploadImage('card2')"> 
+                    <div id="loading-card2" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div> 
+                </div> 
+                <div class="p-6 text-center"> 
+                    <h2 class="card-title mb-2">المديرية الوطنية للخدمات الجامعية</h2> 
+                    <p class="card-description mb-4">يمكنك هنا الإطلاع على سيرورة الخدمات الجامعية في الإقامات الجامعية التابعة لكل مديرية</p> 
+                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/modiriya.html')">دخول</button> 
+                </div> 
+            </div> 
+ 
+            <!-- Card 3 --> 
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out"> 
+                <div class="relative"> 
+                    <img id="img-card3" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card3')"> 
+                    <input type="file" id="file-card3" class="hidden" accept="image/*" onchange="uploadImage('card3')"> 
+                    <div id="loading-card3" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div> 
+                </div> 
+                <div class="p-6 text-center"> 
+                    <h2 class="card-title mb-2">الاقامة الجامعية</h2> 
+                    <p class="card-description mb-4">يمكنك هنا إدارة شؤون الإقامة الجامعية</p> 
+                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/iqama.html')">دخول</button> 
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+ 
+    <footer class="bg-gray-800 text-white py-8 mt-16"> 
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="absolute inset-0 flex justify-center items-center opacity-10">
-                <img src="pages/images/iqama_logo.jpg" class="w-full h-full object-cover">
-            </div>
-        </div>
-    </header>
-
-    <div class="max-w-7xl mx-auto px-4 mt-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Card 1 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <div class="relative">
-                    <img id="img-card1" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card1')">
-                    <input type="file" id="file-card1" class="hidden" accept="image/*" onchange="uploadImage('card1')">
-                    <div id="loading-card1" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
-                </div>
-                <div class="p-6 text-center">
-                    <h2 class="card-title mb-2">الديوان الوطني للخدمات الجامعية</h2>
-                    <p class="card-description mb-4">
-                        يمكنك هنا الإشراف والإطلاع على سيرورة الخدمات الجامعية في المديرات والإقامات الجامعية
-                    </p>
-                    <button class="btn-primary w-full" onclick="navigateToPage('pages/diwane.html')">دخول</button>
-                </div>
-                
-            </div>
-
-            <!-- Card 2 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <div class="relative">
-                    <img id="img-card2" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card2')">
-                    <input type="file" id="file-card2" class="hidden" accept="image/*" onchange="uploadImage('card2')">
-                    <div id="loading-card2" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
-                </div>
-                <div class="p-6 text-center">
-                    <h2 class="card-title mb-2">المديرية الوطنية للخدمات الجامعية</h2>
-                    <p class="card-description mb-4">يمكنك هنا الإطلاع على سيرورة الخدمات الجامعية في الإقامات الجامعية التابعة لكل مديرية</p>
-                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/modiriya.html')">دخول</button>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <div class="relative">
-                    <img id="img-card3" src="pages/images/diwand.jpg" class="w-full h-48 object-cover cursor-pointer" alt="Card Image" onclick="changeImage('card3')">
-                    <input type="file" id="file-card3" class="hidden" accept="image/*" onchange="uploadImage('card3')">
-                    <div id="loading-card3" class="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-lg font-semibold hidden">Uploading...</div>
-                </div>
-                <div class="p-6 text-center">
-                    <h2 class="card-title mb-2">الاقامة الجامعية</h2>
-                    <p class="card-description mb-4">يمكنك هنا إدارة شؤون الإقامة الجامعية</p>
-                    <button class="btn-primary w-full text-center" onclick="navigateToPage('pages/iqama.html')">دخول</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bg-gray-800 text-white py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2024 إدارة الموقع. جميع الحقوق محفوظة.</p>
-        </div>
-    </footer>
+<p>&copy; 2024 إدارة إقامتي. جميع الحقوق محفوظة.</p> 
+        </div> 
+    </footer> 
 </body>
 
+
 </html>
+
 
 
